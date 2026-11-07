@@ -7,6 +7,7 @@ export function testConfig(overrides: Partial<Config> = {}): Config {
     dispatcherLogin: "dispatcher",
     dispatcherPassword: "secret",
     jwtSecret: "test-jwt-secret",
+    overpassUrl: "http://127.0.0.1:1/api/interpreter",
     ...overrides,
   };
 }

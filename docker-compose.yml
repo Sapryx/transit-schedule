@@ -20,6 +20,7 @@ services:
       DISPATCHER_LOGIN: ${DISPATCHER_LOGIN:-dispatcher}
       DISPATCHER_PASSWORD: ${DISPATCHER_PASSWORD:-dispatcher}
       JWT_SECRET: ${JWT_SECRET:-development-jwt-secret}
+      OVERPASS_URL: ${OVERPASS_URL:-}
     ports:
       - "3000:3000"
     depends_on:

@@ -1,8 +1,9 @@
 import express from "express";
 import type pg from "pg";
 import type { Auth } from "./auth.ts";
+import type { NetworkSync } from "./osm/networkSync.ts";
 
-export function createApp({ pool, auth }: { pool: pg.Pool; auth: Auth }): express.Express {
+export function createApp({ pool, auth, networkSync }: { pool: pg.Pool; auth: Auth; networkSync: NetworkSync }): express.Express {
   const app = express();
   app.use(express.json());
   app.get("/health", async (_req, res) => {
@@ -22,5 +23,8 @@ export function createApp({ pool, auth }: { pool: pg.Pool; auth: Auth }): expres
     res.json(session);
   });
   app.use("/api/admin", auth.requireDispatcher);
+  app.post("/api/admin/osm-sync", async (_req, res) => {
+    res.json(await networkSync.run());
+  });
   return app;
 }
