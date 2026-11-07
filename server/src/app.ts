@@ -3,6 +3,8 @@ import type pg from "pg";
 import type { Auth } from "./auth.ts";
 import type { Calendar } from "./calendar.ts";
 import { dayTypeRoutes, holidayRoutes } from "./calendarRoutes.ts";
+import type { NetworkAdmin } from "./networkAdmin.ts";
+import { networkAdminRoutes } from "./networkAdminRoutes.ts";
 import { SyncError, type NetworkSync } from "./osm/networkSync.ts";
 
 export function createApp({
@@ -10,11 +12,13 @@ export function createApp({
   auth,
   calendar,
   networkSync,
+  networkAdmin,
 }: {
   pool: pg.Pool;
   auth: Auth;
   calendar: Calendar;
   networkSync: NetworkSync;
+  networkAdmin: NetworkAdmin;
 }): express.Express {
   const app = express();
   app.use(express.json());
@@ -46,6 +50,7 @@ export function createApp({
     }
   });
   app.use("/api/admin/holidays", holidayRoutes(calendar));
+  app.use("/api/admin", networkAdminRoutes(networkAdmin));
   app.use("/api", dayTypeRoutes(calendar));
   return app;
 }

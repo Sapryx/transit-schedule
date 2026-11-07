@@ -3,7 +3,12 @@ export interface StoredPlatform {
   travelOffset: number | null;
 }
 
-export function resequence(previous: StoredPlatform[], platformIds: number[]): (number | null)[] {
+export interface ResequencedOffset {
+  travelOffset: number | null;
+  interpolated: boolean;
+}
+
+export function resequence(previous: StoredPlatform[], platformIds: number[]): ResequencedOffset[] {
   const commonLength = previous.map(() => Array<number>(platformIds.length + 1).fill(0));
   commonLength.push(Array<number>(platformIds.length + 1).fill(0));
   for (let i = previous.length - 1; i >= 0; i--) {
@@ -25,10 +30,12 @@ export function resequence(previous: StoredPlatform[], platformIds: number[]): (
 
   return keptOffsets.map((offset, index) => {
     if (offset !== undefined) {
-      return offset;
+      return { travelOffset: offset, interpolated: false };
     }
     const before = keptOffsets.slice(0, index).findLast((candidate) => candidate !== undefined);
     const after = keptOffsets.slice(index + 1).find((candidate) => candidate !== undefined);
-    return typeof before === "number" && typeof after === "number" ? Math.round((before + after) / 2) : null;
+    return typeof before === "number" && typeof after === "number"
+      ? { travelOffset: Math.round((before + after) / 2), interpolated: true }
+      : { travelOffset: null, interpolated: false };
   });
 }

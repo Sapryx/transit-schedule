@@ -2,21 +2,23 @@ import { describe, expect, it } from "vitest";
 import { resequence } from "./resequence.ts";
 
 const stored = (...pairs: [number, number | null][]) => pairs.map(([platformId, travelOffset]) => ({ platformId, travelOffset }));
+const kept = (travelOffset: number | null) => ({ travelOffset, interpolated: false });
+const interpolated = (travelOffset: number) => ({ travelOffset, interpolated: true });
 
 describe("resequence", () => {
   it("keeps the offsets of retained platforms", () => {
-    expect(resequence(stored([1, 0], [2, 5], [3, 9]), [1, 3])).toEqual([0, 9]);
+    expect(resequence(stored([1, 0], [2, 5], [3, 9]), [1, 3])).toEqual([kept(0), kept(9)]);
   });
 
   it("gives an inserted platform the rounded midpoint of its neighbours", () => {
-    expect(resequence(stored([1, 0], [2, 5], [3, 10]), [1, 2, 7, 3])).toEqual([0, 5, 8, 10]);
+    expect(resequence(stored([1, 0], [2, 5], [3, 10]), [1, 2, 7, 3])).toEqual([kept(0), kept(5), interpolated(8), kept(10)]);
   });
 
   it("leaves an inserted platform empty without offsets on both sides", () => {
-    expect(resequence(stored([1, 0], [2, null]), [1, 2, 7])).toEqual([0, null, null]);
+    expect(resequence(stored([1, 0], [2, null]), [1, 2, 7])).toEqual([kept(0), kept(null), kept(null)]);
   });
 
   it("matches a platform the sequence visits twice by its place", () => {
-    expect(resequence(stored([1, 0], [2, 4], [1, 9]), [1, 2, 3, 1])).toEqual([0, 4, 7, 9]);
+    expect(resequence(stored([1, 0], [2, 4], [1, 9]), [1, 2, 3, 1])).toEqual([kept(0), kept(4), interpolated(7), kept(9)]);
   });
 });
