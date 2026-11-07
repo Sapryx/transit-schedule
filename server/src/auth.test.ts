@@ -2,17 +2,13 @@ import { asValue } from "awilix";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { buildContainer } from "./container.ts";
+import { testConfig } from "./testing/testConfig.ts";
 
 const signInTime = new Date("2026-11-07T08:00:00.000Z");
 
 function buildApp() {
   let now = signInTime;
-  const container = buildContainer({
-    port: 0,
-    dispatcherLogin: "dispatcher",
-    dispatcherPassword: "secret",
-    jwtSecret: "test-jwt-secret",
-  });
+  const container = buildContainer(testConfig());
   container.register({ clock: asValue({ now: () => now }) });
   return {
     app: container.cradle.app,
@@ -83,12 +79,7 @@ describe("/api/admin guard", () => {
 
   it("refuses a token signed with another secret", async () => {
     const { app } = buildApp();
-    const other = buildContainer({
-      port: 0,
-      dispatcherLogin: "dispatcher",
-      dispatcherPassword: "secret",
-      jwtSecret: "another-secret",
-    }).cradle.app;
+    const other = buildContainer(testConfig({ jwtSecret: "another-secret" })).cradle.app;
     const token = await signIn(other);
 
     const response = await request(app).get("/api/admin/unknown").set("Authorization", `Bearer ${token}`);

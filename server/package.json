@@ -10,13 +10,17 @@
   "dependencies": {
     "awilix": "^13.0.5",
     "express": "^5.3.0",
-    "jose": "^6.2.15"
+    "jose": "^6.2.15",
+    "pg": "^8.23.1"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "^12.2.1",
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
     "supertest": "^7.3.2",
+    "testcontainers": "^12.2.1",
     "typescript": "^7.0.2",
     "vitest": "^5.1.0"
   }

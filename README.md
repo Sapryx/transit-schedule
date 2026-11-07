@@ -63,3 +63,6 @@ cd server && npm install && npm test
 cd dispatcher-web && npm install && npm test && npm run dev
 cd android && ./gradlew test assembleDebug
 ```
+
+Server tests start PostgreSQL with Testcontainers, so Docker must be running. The server applies the SQL files
+in `server/migrations/` at startup in name order (`0001_create_routes.sql`, `0002_…`); each file runs once.
