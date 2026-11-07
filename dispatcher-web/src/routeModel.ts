@@ -3,6 +3,8 @@ export interface Name {
   en: string;
 }
 
+export const localName = (name: Name, language: string | undefined) => (language === "ru" ? name.ru : name.en);
+
 export const modes = ["bus", "trolleybus"] as const;
 
 export interface DirectionSummary {

@@ -1,4 +1,5 @@
-import type pg from "pg";
+import pg from "pg";
+import { transaction } from "./database.ts";
 import type { Point, TransportMode } from "./osm/networkMapper.ts";
 
 interface Name {
@@ -39,9 +40,23 @@ export interface DirectionDetail extends DirectionSummary {
   path: Point[];
 }
 
+export interface StopSummary {
+  id: number;
+  name: Name;
+  missingFromOsm: boolean;
+}
+
+export type Outcome = "done" | "not_found" | "not_missing_from_osm" | "stop_in_use";
+
+export type Deletable = "routes" | "directions" | "stops";
+
 export interface NetworkAdmin {
   routes(): Promise<RouteSummary[]>;
   route(id: number): Promise<RouteSummary<DirectionDetail> | null>;
+  stops(): Promise<StopSummary[]>;
+  confirmReview(directionId: number): Promise<Outcome>;
+  setWithdrawn(routeId: number, withdrawn: boolean): Promise<Outcome>;
+  remove(table: Deletable, id: number): Promise<Outcome>;
 }
 
 const stopName = (stop: string) => `json_build_object('ru', ${stop}.name_ru, 'en', ${stop}.name_en)`;
@@ -85,6 +100,46 @@ export function createNetworkAdmin({ pool }: { pool: pg.Pool }): NetworkAdmin {
     async route(id) {
       const { rows } = await pool.query<RouteSummary<DirectionDetail>>(routeQuery(directionDetail, "WHERE r.id = $1"), [id]);
       return rows[0] ?? null;
+    },
+
+    async stops() {
+      const { rows } = await pool.query<StopSummary>(
+        `SELECT id, ${stopName("stops")} AS name, missing_from_osm AS "missingFromOsm" FROM stops ORDER BY name_ru, id`,
+      );
+      return rows;
+    },
+
+    confirmReview(directionId) {
+      return transaction(pool, async (client) => {
+        const { rowCount } = await client.query("UPDATE directions SET needs_review = false WHERE id = $1", [directionId]);
+        if (!rowCount) {
+          return "not_found";
+        }
+        await client.query("UPDATE direction_platforms SET interpolated = false WHERE direction_id = $1", [directionId]);
+        return "done";
+      });
+    },
+
+    async setWithdrawn(routeId, withdrawn) {
+      const { rowCount } = await pool.query("UPDATE routes SET withdrawn = $2 WHERE id = $1", [routeId, withdrawn]);
+      return rowCount ? "done" : "not_found";
+    },
+
+    async remove(table, id) {
+      try {
+        const { rows } = await pool.query<{ missing: boolean | null }>(
+          `WITH target AS (SELECT missing_from_osm FROM ${table} WHERE id = $1),
+             deleted AS (DELETE FROM ${table} WHERE id = $1 AND missing_from_osm)
+           SELECT (SELECT missing_from_osm FROM target) AS missing`,
+          [id],
+        );
+        return rows[0].missing === null ? "not_found" : rows[0].missing ? "done" : "not_missing_from_osm";
+      } catch (error) {
+        if (error instanceof pg.DatabaseError && error.code === "23503") {
+          return "stop_in_use";
+        }
+        throw error;
+      }
     },
   };
 }
