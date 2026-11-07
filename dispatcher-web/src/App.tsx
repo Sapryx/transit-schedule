@@ -8,6 +8,7 @@ import { OsmSyncPage } from "./OsmSyncPage.tsx";
 import { RoutePage } from "./RoutePage.tsx";
 import { RoutesPage } from "./RoutesPage.tsx";
 import { SignInPage } from "./SignInPage.tsx";
+import { StopsPage } from "./StopsPage.tsx";
 
 function HomePage() {
   const { t } = useTranslation();
@@ -32,6 +33,7 @@ export function App() {
         <Route index element={<HomePage />} />
         <Route path="routes" element={<RoutesPage />} />
         <Route path="routes/:id" element={<RoutePage />} />
+        <Route path="stops" element={<StopsPage />} />
         <Route path="holidays" element={<HolidaysPage />} />
         <Route path="osm-sync" element={<OsmSyncPage />} />
       </Route>

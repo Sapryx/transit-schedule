@@ -1,9 +1,9 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it } from "vitest";
 import { apiServer } from "./testing/apiServer.ts";
 import { renderApp } from "./testing/renderApp.tsx";
-import { routeDetail, routes } from "./testing/routeFixtures.ts";
+import { missingRouteDetail, routeDetail, routes } from "./testing/routeFixtures.ts";
 
 const locales = [
   {
@@ -31,6 +31,16 @@ const locales = [
     notFound: "Route not found.",
     failed: "Something went wrong. Try again later.",
     stops: ["Volotova", "Khram", "Vokzal"],
+    interpolated: "interpolated",
+    review: "The last sync changed this platform sequence. Check the highlighted travel offsets: they were interpolated.",
+    confirmReview: "Confirm review",
+    withdrawnToggle: "Withdrawn from service",
+    deleteRoute: "Delete route",
+    deleteDirection: "Delete direction",
+    deleteQuestion: "Delete permanently? This cannot be undone.",
+    confirmDelete: "Delete",
+    cancel: "Cancel",
+    notMissing: "Only objects missing from OSM can be deleted.",
   },
   {
     language: "ru",
@@ -57,6 +67,16 @@ const locales = [
     notFound: "Маршрут не найден.",
     failed: "Что-то пошло не так. Повторите попытку позже.",
     stops: ["Волотова", "Храм", "Вокзал"],
+    interpolated: "интерполировано",
+    review: "Последняя синхронизация изменила последовательность платформ. Проверьте выделенное время в пути: оно интерполировано.",
+    confirmReview: "Подтвердить проверку",
+    withdrawnToggle: "Снят с линии",
+    deleteRoute: "Удалить маршрут",
+    deleteDirection: "Удалить направление",
+    deleteQuestion: "Удалить безвозвратно? Отменить это нельзя.",
+    confirmDelete: "Удалить",
+    cancel: "Отмена",
+    notMissing: "Удалить можно только то, что пропало из OSM.",
   },
 ];
 
@@ -65,6 +85,7 @@ beforeEach(() => {
   apiServer.use(
     http.get("http://localhost/api/admin/routes", () => HttpResponse.json(routes)),
     http.get("http://localhost/api/admin/routes/3", () => HttpResponse.json(routeDetail)),
+    http.get("http://localhost/api/admin/routes/4", () => HttpResponse.json(missingRouteDetail)),
     http.get("http://localhost/api/admin/routes/99", () => HttpResponse.json({ error: "not_found" }, { status: 404 })),
   );
 });
@@ -161,7 +182,7 @@ describe.each(locales)("route page in $language", (text) => {
       within(table).getAllByRole("row").slice(1).map((row) => [row.textContent, within(row).queryByRole("spinbutton")?.getAttribute("value") ?? null]);
     const first = screen.getByRole("table", { name: text.direction });
     expect(within(first).getAllByRole("columnheader").map((header) => header.textContent)).toEqual(["#", text.stop, text.travelOffset]);
-    expect(offsets(first)).toEqual([[`1${text.stops[0]}0`, null], [`2${text.stops[1]}`, "4"], [`3${text.stops[2]}`, "9"]]);
+    expect(offsets(first)).toEqual([[`1${text.stops[0]}0`, null], [`2${text.stops[1]} ${text.interpolated}`, "4"], [`3${text.stops[2]}`, "9"]]);
     expect(within(screen.getByRole("region", { name: text.direction })).getByText(`${text.scheduled}, ${text.needsReview}`)).toBeInTheDocument();
     const second = screen.getByRole("table", { name: text.plainDirection });
     expect(offsets(second)).toEqual([[`1${text.stops[2]}0`, null], [`2${text.stops[0]}`, ""]]);
@@ -171,5 +192,117 @@ describe.each(locales)("route page in $language", (text) => {
     renderApp({ language: text.language, path: "/routes/99" });
 
     expect(await screen.findByRole("alert")).toHaveTextContent(text.notFound);
+  });
+});
+
+describe.each(locales)("route maintenance in $language", (text) => {
+  it("shows the review banner with interpolated platforms highlighted and confirms the review", async () => {
+    let reviewed: string | null = null;
+    apiServer.use(
+      http.post("http://localhost/api/admin/directions/:id/review", ({ params }) => {
+        reviewed = params.id as string;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    const { user } = renderApp({ language: text.language, path: "/routes/3" });
+
+    const region = await screen.findByRole("region", { name: text.direction });
+    expect(within(region).getByText(text.review)).toBeInTheDocument();
+    const rows = within(within(region).getByRole("table", { name: text.direction })).getAllByRole("row").slice(1);
+    expect(rows.map((row) => row.querySelector("mark")?.textContent ?? null)).toEqual([null, text.interpolated, null]);
+    expect(within(screen.getByRole("region", { name: text.plainDirection })).queryByRole("button", { name: text.confirmReview })).not.toBeInTheDocument();
+
+    apiServer.use(
+      http.get("http://localhost/api/admin/routes/3", () =>
+        HttpResponse.json({ ...routeDetail, directions: [{ ...routeDetail.directions[0], needsReview: false }, routeDetail.directions[1]] }),
+      ),
+    );
+    await user.click(within(region).getByRole("button", { name: text.confirmReview }));
+
+    expect(reviewed).toBe("4");
+    await waitFor(() => expect(within(region).queryByText(text.review)).not.toBeInTheDocument());
+  });
+
+  it("withdraws the route and returns it to service", async () => {
+    const sent: unknown[] = [];
+    let withdrawn = false;
+    apiServer.use(
+      http.patch("http://localhost/api/admin/routes/3", async ({ request }) => {
+        const body = (await request.json()) as { withdrawn: boolean };
+        sent.push(body);
+        withdrawn = body.withdrawn;
+        return new HttpResponse(null, { status: 204 });
+      }),
+      http.get("http://localhost/api/admin/routes/3", () => HttpResponse.json({ ...routeDetail, withdrawn })),
+    );
+    const { user } = renderApp({ language: text.language, path: "/routes/3" });
+
+    const toggle = await screen.findByRole("checkbox", { name: text.withdrawnToggle });
+    expect(toggle).not.toBeChecked();
+    await user.click(toggle);
+    await waitFor(() => expect(toggle).toBeChecked());
+    await user.click(toggle);
+    await waitFor(() => expect(toggle).not.toBeChecked());
+
+    expect(sent).toEqual([{ withdrawn: true }, { withdrawn: false }]);
+  });
+
+  it("offers deletion only for objects missing from OSM", async () => {
+    renderApp({ language: text.language, path: "/routes/3" });
+
+    await screen.findByRole("heading", { name: text.routeHeading });
+    expect(screen.queryByRole("button", { name: text.deleteRoute })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: text.deleteDirection })).not.toBeInTheDocument();
+  });
+
+  it("deletes a missing direction after confirmation", async () => {
+    let deleted: string | null = null;
+    apiServer.use(
+      http.delete("http://localhost/api/admin/directions/:id", ({ params }) => {
+        deleted = params.id as string;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    const { user } = renderApp({ language: text.language, path: "/routes/4" });
+
+    await user.click(await screen.findByRole("button", { name: text.deleteDirection }));
+    expect(screen.getByText(text.deleteQuestion)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: text.cancel }));
+    expect(screen.queryByText(text.deleteQuestion)).not.toBeInTheDocument();
+    expect(deleted).toBeNull();
+
+    apiServer.use(http.get("http://localhost/api/admin/routes/4", () => HttpResponse.json({ ...missingRouteDetail, directions: [] })));
+    await user.click(screen.getByRole("button", { name: text.deleteDirection }));
+    await user.click(screen.getByRole("button", { name: text.confirmDelete }));
+
+    expect(deleted).toBe("6");
+    await waitFor(() => expect(screen.queryByRole("table")).not.toBeInTheDocument());
+  });
+
+  it("deletes a missing route after confirmation and returns to the route list", async () => {
+    let deleted = false;
+    apiServer.use(
+      http.delete("http://localhost/api/admin/routes/4", () => {
+        deleted = true;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    const { user } = renderApp({ language: text.language, path: "/routes/4" });
+
+    await user.click(await screen.findByRole("button", { name: text.deleteRoute }));
+    await user.click(screen.getByRole("button", { name: text.confirmDelete }));
+
+    expect(await screen.findByRole("heading", { name: text.heading })).toBeInTheDocument();
+    expect(deleted).toBe(true);
+  });
+
+  it("reports a refused deletion", async () => {
+    apiServer.use(http.delete("http://localhost/api/admin/routes/4", () => HttpResponse.json({ error: "not_missing_from_osm" }, { status: 409 })));
+    const { user } = renderApp({ language: text.language, path: "/routes/4" });
+
+    await user.click(await screen.findByRole("button", { name: text.deleteRoute }));
+    await user.click(screen.getByRole("button", { name: text.confirmDelete }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(text.notMissing);
   });
 });

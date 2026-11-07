@@ -28,14 +28,14 @@ export const routes = [
   route(5, "10а", "bus", [direction(7, { scheduled: true })], { withdrawn: true }),
 ];
 
-const platform = (platformId: number, stopName: typeof vokzal, travelOffset: number | null) => ({
+const platform = (platformId: number, stopName: typeof vokzal, travelOffset: number | null, interpolated = false) => ({
   platformId,
   stopId: platformId,
   stopName,
   lat: 52.4,
   lon: 31,
   travelOffset,
-  interpolated: false,
+  interpolated,
 });
 
 export const routeDetail = {
@@ -44,7 +44,7 @@ export const routeDetail = {
     {
       ...direction(4, { scheduled: true, needsReview: true }),
       name: { from: volotova, to: vokzal, via: khram },
-      platforms: [platform(10, volotova, 0), platform(11, khram, 4), platform(12, vokzal, 9)],
+      platforms: [platform(10, volotova, 0), platform(11, khram, 4, true), platform(12, vokzal, 9)],
       departures: { weekday: [360], weekend: [] as number[] },
       path: [[52.4, 31], [52.41, 31.01]],
     },
@@ -55,4 +55,9 @@ export const routeDetail = {
       path: [],
     },
   ],
+};
+
+export const missingRouteDetail = {
+  ...route(4, "20", "bus", [], { missingFromOsm: true }),
+  directions: [{ ...direction(6, { missingFromOsm: true }), platforms: [platform(12, vokzal, null)], departures: { weekday: [] as number[], weekend: [] as number[] }, path: [] }],
 };

@@ -15,7 +15,8 @@
     "routes": "Routes",
     "holidays": "Holidays",
     "osmSync": "Sync with OSM",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "stops": "Stops"
   },
   "home": {
     "welcome": "Choose a section in the navigation."
@@ -112,6 +113,27 @@
     "invalidTime": "Enter a time as HH:MM; after midnight continue past 24:00, e.g. 24:20.",
     "invalidSeries": "Enter a start, an end not earlier than the start and an interval of at least 1 minute.",
     "duplicateDeparture": "This departure already exists.",
-    "trips": "Trips"
+    "trips": "Trips",
+    "interpolated": "interpolated",
+    "review": "The last sync changed this platform sequence. Check the highlighted travel offsets: they were interpolated.",
+    "confirmReview": "Confirm review",
+    "withdrawn": "Withdrawn from service",
+    "deleteRoute": "Delete route",
+    "deleteDirection": "Delete direction"
+  },
+  "stops": {
+    "heading": "Stops",
+    "name": "Name",
+    "state": "State",
+    "missing": "Missing from OSM",
+    "inOsm": "In OSM",
+    "delete": "Delete stop"
+  },
+  "delete": {
+    "question": "Delete permanently? This cannot be undone.",
+    "confirm": "Delete",
+    "cancel": "Cancel",
+    "not_missing_from_osm": "Only objects missing from OSM can be deleted.",
+    "stop_in_use": "Directions still pass through this stop. Delete them first."
   }
 }
