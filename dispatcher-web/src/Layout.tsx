@@ -12,6 +12,7 @@ export function Layout() {
         <nav>
           <NavLink to="/">{t("nav.home")}</NavLink>
           <NavLink to="/holidays">{t("nav.holidays")}</NavLink>
+          <NavLink to="/osm-sync">{t("nav.osmSync")}</NavLink>
         </nav>
         <button type="button" onClick={authStore.signOut}>
           {t("nav.signOut")}
