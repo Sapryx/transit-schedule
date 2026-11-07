@@ -1,7 +1,6 @@
 import express from "express";
 import type { Deletable, NetworkAdmin, Outcome } from "./networkAdmin.ts";
-
-const isId = (value: string) => /^[1-9]\d{0,8}$/.test(value);
+import { isId } from "./routeParams.ts";
 
 const statuses: Record<Exclude<Outcome, "done">, number> = { not_found: 404, not_missing_from_osm: 409, stop_in_use: 409 };
 
