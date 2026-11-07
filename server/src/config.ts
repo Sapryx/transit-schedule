@@ -4,6 +4,7 @@ export interface Config {
   dispatcherLogin: string;
   dispatcherPassword: string;
   jwtSecret: string;
+  overpassUrl: string;
 }
 
 function required(env: Record<string, string | undefined>, name: string): string {
@@ -21,5 +22,6 @@ export function readConfig(env: Record<string, string | undefined>): Config {
     dispatcherLogin: required(env, "DISPATCHER_LOGIN"),
     dispatcherPassword: required(env, "DISPATCHER_PASSWORD"),
     jwtSecret: required(env, "JWT_SECRET"),
+    overpassUrl: env.OVERPASS_URL || "http://overpass-api.de/api/interpreter",
   };
 }

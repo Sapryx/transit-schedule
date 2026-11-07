@@ -3,8 +3,19 @@ import type pg from "pg";
 import type { Auth } from "./auth.ts";
 import type { Calendar } from "./calendar.ts";
 import { dayTypeRoutes, holidayRoutes } from "./calendarRoutes.ts";
+import type { NetworkSync } from "./osm/networkSync.ts";
 
-export function createApp({ pool, auth, calendar }: { pool: pg.Pool; auth: Auth; calendar: Calendar }): express.Express {
+export function createApp({
+  pool,
+  auth,
+  calendar,
+  networkSync,
+}: {
+  pool: pg.Pool;
+  auth: Auth;
+  calendar: Calendar;
+  networkSync: NetworkSync;
+}): express.Express {
   const app = express();
   app.use(express.json());
   app.get("/health", async (_req, res) => {
@@ -24,6 +35,9 @@ export function createApp({ pool, auth, calendar }: { pool: pg.Pool; auth: Auth;
     res.json(session);
   });
   app.use("/api/admin", auth.requireDispatcher);
+  app.post("/api/admin/osm-sync", async (_req, res) => {
+    res.json(await networkSync.run());
+  });
   app.use("/api/admin/holidays", holidayRoutes(calendar));
   app.use("/api", dayTypeRoutes(calendar));
   return app;

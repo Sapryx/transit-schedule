@@ -54,7 +54,9 @@ docker compose up -d --build
 - dispatcher panel: http://localhost:8088 (API proxied at `/api`)
 
 Environment variables (optional, defaults in `docker-compose.yml`): `DB_PASSWORD`, `DISPATCHER_LOGIN`,
-`DISPATCHER_PASSWORD`, `JWT_SECRET`; the server refuses to start when any of the last three is empty.
+`DISPATCHER_PASSWORD`, `JWT_SECRET`, `OVERPASS_URL`; the server refuses to start when any of `DISPATCHER_LOGIN`,
+`DISPATCHER_PASSWORD` and `JWT_SECRET` is empty. On an empty network the server fills it from OpenStreetMap
+in the background; `POST /api/admin/osm-sync` runs the sync on demand.
 
 ## Develop
 

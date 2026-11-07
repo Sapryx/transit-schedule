@@ -17,7 +17,12 @@ describe("readConfig", () => {
       dispatcherLogin: "dispatcher",
       dispatcherPassword: "secret",
       jwtSecret: "jwt-secret",
+      overpassUrl: "http://overpass-api.de/api/interpreter",
     });
+  });
+
+  it("reads the Overpass endpoint from OVERPASS_URL", () => {
+    expect(readConfig({ ...env, OVERPASS_URL: "http://mirror.example/api/interpreter" }).overpassUrl).toBe("http://mirror.example/api/interpreter");
   });
 
   it("defaults the port to 3000", () => {
