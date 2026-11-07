@@ -13,9 +13,12 @@ export interface AuthStore {
 const key = "session";
 
 function readSession(storage: Storage): Session | null {
-  const stored = storage.getItem(key);
-  const session: Session | null = stored ? JSON.parse(stored) : null;
-  return session && new Date(session.expiresAt) > new Date() ? session : null;
+  try {
+    const session: Session | null = JSON.parse(storage.getItem(key) ?? "null");
+    return session && new Date(session.expiresAt) > new Date() ? session : null;
+  } catch {
+    return null;
+  }
 }
 
 export function createAuthStore({ storage }: { storage: Storage }): AuthStore {

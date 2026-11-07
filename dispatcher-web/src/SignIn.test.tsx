@@ -116,6 +116,14 @@ describe("session", () => {
     expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument();
   });
 
+  it("is dropped on reload when the stored session is corrupt", () => {
+    localStorage.setItem("session", "{not json");
+
+    renderApp();
+
+    expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument();
+  });
+
   it("sends the token with API calls", async () => {
     localStorage.setItem("session", JSON.stringify(validSession));
     apiServer.use(
