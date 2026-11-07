@@ -1,7 +1,6 @@
 import express from "express";
 import type { NetworkAdmin } from "./networkAdmin.ts";
-
-const isId = (value: string) => /^[1-9]\d{0,8}$/.test(value);
+import { isId } from "./routeParams.ts";
 
 export function networkAdminRoutes(networkAdmin: NetworkAdmin): express.Router {
   const router = express.Router();
