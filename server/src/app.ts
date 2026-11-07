@@ -3,7 +3,7 @@ import type pg from "pg";
 import type { Auth } from "./auth.ts";
 import type { Calendar } from "./calendar.ts";
 import { dayTypeRoutes, holidayRoutes } from "./calendarRoutes.ts";
-import type { NetworkSync } from "./osm/networkSync.ts";
+import { SyncError, type NetworkSync } from "./osm/networkSync.ts";
 
 export function createApp({
   pool,
@@ -36,7 +36,14 @@ export function createApp({
   });
   app.use("/api/admin", auth.requireDispatcher);
   app.post("/api/admin/osm-sync", async (_req, res) => {
-    res.json(await networkSync.run());
+    try {
+      res.json(await networkSync.run());
+    } catch (error) {
+      if (!(error instanceof SyncError)) {
+        throw error;
+      }
+      res.status(error.code === "sync_in_progress" ? 409 : 502).json({ error: error.code });
+    }
   });
   app.use("/api/admin/holidays", holidayRoutes(calendar));
   app.use("/api", dayTypeRoutes(calendar));
