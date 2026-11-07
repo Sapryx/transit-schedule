@@ -2,12 +2,8 @@ import { asFunction, asValue, createContainer, InjectionMode } from "awilix";
 import type { i18n } from "i18next";
 import { createApiClient, type ApiClient } from "./apiClient.ts";
 import { createAuthStore, type AuthStore } from "./authStore.ts";
+import type { Config } from "./config.ts";
 import { createI18n } from "./i18n.ts";
-
-export interface Config {
-  apiBaseUrl: string;
-  language: string;
-}
 
 export interface Cradle {
   config: Config;

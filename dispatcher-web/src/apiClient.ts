@@ -1,5 +1,5 @@
 import type { AuthStore } from "./authStore.ts";
-import type { Config } from "./container.ts";
+import type { Config } from "./config.ts";
 
 export class ApiError extends Error {
   readonly code: string;
