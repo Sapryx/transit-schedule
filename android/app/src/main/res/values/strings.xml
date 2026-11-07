@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Transit Schedule</string>
+    <string name="tab_routes">Routes</string>
+    <string name="tab_stops">Stops</string>
+    <string name="tab_journey">Journey</string>
+    <string name="tab_map">Map</string>
+    <string name="tab_favourites">Favourites</string>
 </resources>
