@@ -4,12 +4,12 @@ import { useNavigate, useParams } from "react-router";
 import { ApiError } from "./apiClient.ts";
 import { DeleteButton, failureKey } from "./DeleteButton.tsx";
 import { useDependencies } from "./DependenciesContext.tsx";
-import { directionStates, type DirectionDetail, type Name, type RouteSummary } from "./routeModel.ts";
+import { directionStates, localName, type DirectionDetail, type Name, type RouteSummary } from "./routeModel.ts";
 
 function Direction({ direction, change }: { direction: DirectionDetail; change: (method: string, path: string) => void }) {
   const { t, i18n } = useTranslation();
   const headingId = useId();
-  const local = (name: Name) => (i18n.resolvedLanguage === "ru" ? name.ru : name.en);
+  const local = (name: Name) => localName(name, i18n.resolvedLanguage);
   const { from, to, via } = direction.name;
   const title = via ? t("route.directionVia", { from: local(from), to: local(to), via: local(via) }) : t("route.direction", { from: local(from), to: local(to) });
 

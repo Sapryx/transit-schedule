@@ -3,7 +3,7 @@ import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { insertPlatform, overpassFixture } from "./testing/overpassFixture.ts";
 import { useTestServer } from "./testing/testServer.ts";
-import type { RouteSummary as Route } from "./networkAdmin.ts";
+import type { RouteSummary as Route, StopSummary } from "./networkAdmin.ts";
 import type { OsmElement } from "./osm/osmSource.ts";
 
 describe("network admin", () => {
@@ -29,7 +29,7 @@ describe("network admin", () => {
     return response.body.find((route: Route) => route.number === number);
   }
 
-  async function stopNamed(ru: string): Promise<{ id: number; name: { ru: string; en: string }; missingFromOsm: boolean }> {
+  async function stopNamed(ru: string): Promise<StopSummary> {
     const response = await get("/api/admin/stops");
     return response.body.find((stop: { name: { ru: string } }) => stop.name.ru === ru);
   }

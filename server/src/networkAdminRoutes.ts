@@ -3,7 +3,7 @@ import type { Deletable, NetworkAdmin, Outcome } from "./networkAdmin.ts";
 
 const isId = (value: string) => /^[1-9]\d{0,8}$/.test(value);
 
-const statuses: Record<Outcome, number> = { done: 204, not_found: 404, not_missing_from_osm: 409, stop_in_use: 409 };
+const statuses: Record<Exclude<Outcome, "done">, number> = { not_found: 404, not_missing_from_osm: 409, stop_in_use: 409 };
 
 function reply(res: express.Response, outcome: Outcome) {
   if (outcome === "done") {

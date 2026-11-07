@@ -8,6 +8,8 @@ const locales = [
   {
     language: "en",
     nav: "Stops",
+    heading: "Stops",
+    hint: "Stops, platform sequences and paths come from OpenStreetMap and cannot be changed here. Correct them in OpenStreetMap and run a sync.",
     name: "Name",
     state: "State",
     missing: "Missing from OSM",
@@ -21,6 +23,8 @@ const locales = [
   {
     language: "ru",
     nav: "Остановки",
+    heading: "Остановки",
+    hint: "Остановки, последовательности платформ и пути берутся из OpenStreetMap и здесь не меняются. Исправьте их в OpenStreetMap и запустите синхронизацию.",
     name: "Название",
     state: "Состояние",
     missing: "Пропала из OSM",
@@ -49,6 +53,8 @@ describe.each(locales)("stops in $language", (text) => {
 
     await user.click(screen.getByRole("link", { name: text.nav }));
 
+    expect(screen.getByRole("heading", { name: text.heading })).toBeInTheDocument();
+    expect(screen.getByText(text.hint)).toBeInTheDocument();
     const table = await screen.findByRole("table");
     expect(within(table).getAllByRole("columnheader").map((header) => header.textContent)).toEqual([text.name, text.state, ""]);
     const [missing, present] = within(table).getAllByRole("row").slice(1);
