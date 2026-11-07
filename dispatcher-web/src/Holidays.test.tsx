@@ -96,6 +96,7 @@ describe.each(locales)("holidays page in $language", (text) => {
     await user.click(screen.getByRole("button", { name: text.add }));
 
     expect(await screen.findByText(text.added)).toBeInTheDocument();
+    expect(screen.getByLabelText(text.date)).toHaveValue("");
   });
 
   it("reports a duplicate holiday", async () => {

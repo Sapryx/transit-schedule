@@ -20,7 +20,7 @@ export function HolidaysPage() {
   const [date, setDate] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const run = useCallback(async (action: () => Promise<unknown>) => {
+  const changeAndReload = useCallback(async (action: () => Promise<unknown>) => {
     try {
       await action();
       setError(null);
@@ -31,12 +31,15 @@ export function HolidaysPage() {
   }, [apiClient, showPast]);
 
   useEffect(() => {
-    run(async () => {});
-  }, [run]);
+    changeAndReload(async () => {});
+  }, [changeAndReload]);
 
   function add(event: FormEvent) {
     event.preventDefault();
-    run(() => apiClient.request("POST", "/admin/holidays", { date }));
+    changeAndReload(async () => {
+      await apiClient.request("POST", "/admin/holidays", { date });
+      setDate("");
+    });
   }
 
   const format = new Intl.DateTimeFormat(i18n.language, { dateStyle: "long", timeZone: "UTC" });
@@ -61,7 +64,7 @@ export function HolidaysPage() {
         {holidays?.map((holiday) => (
           <li key={holiday.date}>
             {format.format(new Date(`${holiday.date}T00:00:00.000Z`))}{" "}
-            <button type="button" onClick={() => run(() => apiClient.request("DELETE", `/admin/holidays/${holiday.date}`))}>
+            <button type="button" onClick={() => changeAndReload(() => apiClient.request("DELETE", `/admin/holidays/${holiday.date}`))}>
               {t("holidays.remove")}
             </button>
           </li>
