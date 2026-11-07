@@ -41,6 +41,20 @@ These rules override the user's global "never push / only propose commits" rules
   to watch it), then `./gradlew installDebug`. The emulator reaches the host's compose stack at `10.0.2.2`
   (server `http://10.0.2.2:3000`); plain HTTP needs a network security config allowing cleartext to that host.
   Screenshots: `adb exec-out screencap -p > shot.png`.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live in GitHub Issues of Sapryx/transit-schedule (gh CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 - Node runs `.ts` by type stripping: only erasable TypeScript (no decorators, enums, parameter properties);
   relative imports use the `.ts` extension.
 - Docker CLI is not on PATH: prepend `/c/Program Files/Docker/Docker/resources/bin` (Git Bash).
