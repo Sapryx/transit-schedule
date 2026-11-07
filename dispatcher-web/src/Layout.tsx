@@ -11,6 +11,7 @@ export function Layout() {
         <h1>{t("app.title")}</h1>
         <nav>
           <NavLink to="/">{t("nav.home")}</NavLink>
+          <NavLink to="/holidays">{t("nav.holidays")}</NavLink>
         </nav>
         <button type="button" onClick={authStore.signOut}>
           {t("nav.signOut")}

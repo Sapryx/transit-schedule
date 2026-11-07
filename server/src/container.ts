@@ -3,6 +3,7 @@ import type express from "express";
 import type pg from "pg";
 import { createApp } from "./app.ts";
 import { createAuth, type Auth } from "./auth.ts";
+import { createCalendar, type Calendar } from "./calendar.ts";
 import { createSystemClock, type Clock } from "./clock.ts";
 import type { Config } from "./config.ts";
 import { createPool } from "./database.ts";
@@ -16,6 +17,7 @@ export interface Cradle {
   auth: Auth;
   osmSource: OsmSource;
   networkSync: NetworkSync;
+  calendar: Calendar;
   app: express.Express;
 }
 
@@ -28,6 +30,7 @@ export function buildContainer(config: Config) {
     auth: asFunction(createAuth).singleton(),
     osmSource: asFunction(createOverpassSource).singleton(),
     networkSync: asFunction(createNetworkSync).singleton(),
+    calendar: asFunction(createCalendar).singleton(),
     app: asFunction(createApp).singleton(),
   });
   return container;
