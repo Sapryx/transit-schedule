@@ -5,6 +5,8 @@ import { useDependencies } from "./DependenciesContext.tsx";
 import { HolidaysPage } from "./HolidaysPage.tsx";
 import { Layout } from "./Layout.tsx";
 import { OsmSyncPage } from "./OsmSyncPage.tsx";
+import { RoutePage } from "./RoutePage.tsx";
+import { RoutesPage } from "./RoutesPage.tsx";
 import { SignInPage } from "./SignInPage.tsx";
 
 function HomePage() {
@@ -28,6 +30,8 @@ export function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
+        <Route path="routes" element={<RoutesPage />} />
+        <Route path="routes/:id" element={<RoutePage />} />
         <Route path="holidays" element={<HolidaysPage />} />
         <Route path="osm-sync" element={<OsmSyncPage />} />
       </Route>

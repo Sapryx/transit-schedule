@@ -11,6 +11,7 @@ export function Layout() {
         <h1>{t("app.title")}</h1>
         <nav>
           <NavLink to="/">{t("nav.home")}</NavLink>
+          <NavLink to="/routes">{t("nav.routes")}</NavLink>
           <NavLink to="/holidays">{t("nav.holidays")}</NavLink>
           <NavLink to="/osm-sync">{t("nav.osmSync")}</NavLink>
         </nav>
