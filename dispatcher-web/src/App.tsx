@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router";
 import { useDependencies } from "./DependenciesContext.tsx";
+import { HolidaysPage } from "./HolidaysPage.tsx";
 import { Layout } from "./Layout.tsx";
 import { SignInPage } from "./SignInPage.tsx";
 
@@ -26,6 +27,7 @@ export function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
+        <Route path="holidays" element={<HolidaysPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
