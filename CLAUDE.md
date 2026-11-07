@@ -28,7 +28,9 @@ These rules override the user's global "never push / only propose commits" rules
 - User-facing text is localized in `en` and `ru`; whoever adds a string adds both translations and a test in each
   locale. Web: i18next resources `dispatcher-web/src/locales/{en,ru}.json`, read with `useTranslation`.
   Android: `res/values/strings.xml` and `res/values-ru/strings.xml`, read with `stringResource`; Robolectric
-  tests pick the locale with `@Config(qualifiers = "ru")`. Server responses carry data and error codes, not prose.
+  tests pick the locale with `@Config(qualifiers = "ru")`. Server responses carry data and error codes, not prose;
+  passenger endpoints return names in the language of `Accept-Language` (`ru`/`en`, fallback `en`), which every
+  client sends with its current locale.
 - Logs, code identifiers and all project documentation (README, `docs/`, issues, PRs) are in English.
 
 ## Gotchas
