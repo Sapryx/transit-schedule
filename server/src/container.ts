@@ -3,6 +3,7 @@ import type express from "express";
 import type pg from "pg";
 import { createApp } from "./app.ts";
 import { createAuth, type Auth } from "./auth.ts";
+import { createCalendar, type Calendar } from "./calendar.ts";
 import { createSystemClock, type Clock } from "./clock.ts";
 import type { Config } from "./config.ts";
 import { createPool } from "./database.ts";
@@ -12,6 +13,7 @@ export interface Cradle {
   clock: Clock;
   pool: pg.Pool;
   auth: Auth;
+  calendar: Calendar;
   app: express.Express;
 }
 
@@ -22,6 +24,7 @@ export function buildContainer(config: Config) {
     clock: asFunction(createSystemClock).singleton(),
     pool: asFunction(createPool).singleton().disposer((pool) => pool.end()),
     auth: asFunction(createAuth).singleton(),
+    calendar: asFunction(createCalendar).singleton(),
     app: asFunction(createApp).singleton(),
   });
   return container;
