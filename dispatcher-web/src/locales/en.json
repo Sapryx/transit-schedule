@@ -12,6 +12,7 @@
   },
   "nav": {
     "home": "Home",
+    "routes": "Routes",
     "holidays": "Holidays",
     "osmSync": "Sync with OSM",
     "signOut": "Sign out"
@@ -59,5 +60,34 @@
     "inProgress": "Another sync is already running. Wait for it to finish.",
     "unavailable": "OpenStreetMap is unavailable. Try again later.",
     "failed": "Something went wrong. Try again later."
+  },
+  "routes": {
+    "heading": "Routes",
+    "mode": "Mode",
+    "state": "State",
+    "number": "Number",
+    "all": "All",
+    "modes": {
+      "bus": "Bus",
+      "trolleybus": "Trolleybus"
+    },
+    "states": {
+      "scheduled": "Scheduled",
+      "unscheduled": "Unscheduled",
+      "needsReview": "Needs review",
+      "withdrawn": "Withdrawn",
+      "missing": "Missing from OSM"
+    },
+    "empty": "No routes match.",
+    "failed": "Something went wrong. Try again later."
+  },
+  "route": {
+    "heading": "{{mode}} {{number}}",
+    "direction": "{{from}} → {{to}}",
+    "directionVia": "{{from}} → {{to}} via {{via}}",
+    "stop": "Stop",
+    "travelOffset": "Travel offset, min",
+    "osmHint": "Stops, platform sequences and paths come from OpenStreetMap and cannot be changed here. Correct them in OpenStreetMap and run a sync.",
+    "notFound": "Route not found."
   }
 }

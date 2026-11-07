@@ -1,7 +1,7 @@
 import { asValue } from "awilix";
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { overpassFixture } from "../testing/overpassFixture.ts";
+import { edit, insertPlatform, overpassFixture } from "../testing/overpassFixture.ts";
 import { useTestServer } from "../testing/testServer.ts";
 import type { OsmElement } from "./osmSource.ts";
 
@@ -19,22 +19,6 @@ const firstSyncReport = {
   skippedRoutes,
 };
 const unchangedReport = { stops: unchanged, platforms: unchanged, routes: unchanged, directions: unchanged, needsReview: [], skippedRoutes };
-
-const lonePlatform: OsmElement = { type: "node", id: 1, lat: 52.466, lon: 31.03, tags: { public_transport: "platform", "name:ru": "Новая" } };
-
-function edit(elements: OsmElement[], id: number, change: (element: OsmElement) => OsmElement): OsmElement[] {
-  return elements.map((element) => (element.id === id ? change(element) : element));
-}
-
-function insertPlatform(elements: OsmElement[]): OsmElement[] {
-  const inserted = edit(elements, 7911648, (element) => {
-    const relation = element as Extract<OsmElement, { type: "relation" }>;
-    const members = [...relation.members];
-    members.splice(members.findIndex((member) => member.ref === 5336093616) + 1, 0, { type: "node", ref: lonePlatform.id, role: "platform" });
-    return { ...relation, members };
-  });
-  return [...inserted, lonePlatform];
-}
 
 describe("OSM sync", () => {
   const server = useTestServer();

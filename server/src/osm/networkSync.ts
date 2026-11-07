@@ -145,12 +145,18 @@ export function createNetworkSync({ pool, osmSource }: { pool: pg.Pool; osmSourc
           const previous = stored.get(direction.id) ?? [];
           return { ...direction, offsets: resequence(previous, direction.platformIds), scheduled: departed.has(direction.id) || previous.some((platform) => platform.travelOffset !== null) };
         });
-      const sequence = resequenced.flatMap((direction) => direction.platformIds.map((platformId, position) => ({ directionId: direction.id, position, platformId, offset: direction.offsets[position] })));
+      const sequence = resequenced.flatMap((direction) => direction.platformIds.map((platformId, position) => ({ directionId: direction.id, position, platformId, ...direction.offsets[position] })));
       await client.query("DELETE FROM direction_platforms WHERE direction_id = ANY($1)", [resequenced.map((direction) => direction.id)]);
       await client.query(
-        `INSERT INTO direction_platforms (direction_id, position, platform_id, travel_offset)
-         SELECT * FROM unnest($1::int[], $2::int[], $3::int[], $4::int[])`,
-        [sequence.map((item) => item.directionId), sequence.map((item) => item.position), sequence.map((item) => item.platformId), sequence.map((item) => item.offset)],
+        `INSERT INTO direction_platforms (direction_id, position, platform_id, travel_offset, interpolated)
+         SELECT * FROM unnest($1::int[], $2::int[], $3::int[], $4::int[], $5::bool[])`,
+        [
+          sequence.map((item) => item.directionId),
+          sequence.map((item) => item.position),
+          sequence.map((item) => item.platformId),
+          sequence.map((item) => item.travelOffset),
+          sequence.map((item) => item.interpolated),
+        ],
       );
       const needsReview = resequenced.filter((direction) => direction.scheduled).map((direction) => direction.id);
       await client.query("UPDATE directions SET needs_review = true WHERE id = ANY($1)", [needsReview]);
