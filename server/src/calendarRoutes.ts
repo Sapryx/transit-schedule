@@ -5,7 +5,7 @@ function invalidDate(res: express.Response) {
   res.status(422).json({ error: "invalid_date" });
 }
 
-export function calendarRoutes(calendar: Calendar): express.Router {
+export function dayTypeRoutes(calendar: Calendar): express.Router {
   const router = express.Router();
 
   router.get("/calendar/day-type", async (req, res) => {
@@ -17,12 +17,18 @@ export function calendarRoutes(calendar: Calendar): express.Router {
     res.json(await calendar.dayInfo(date));
   });
 
-  router.get("/admin/holidays", async (req, res) => {
+  return router;
+}
+
+export function holidayRoutes(calendar: Calendar): express.Router {
+  const router = express.Router();
+
+  router.get("/", async (req, res) => {
     const dates = await calendar.holidays(req.query.past === "true");
     res.json(dates.map((date) => ({ date })));
   });
 
-  router.post("/admin/holidays", async (req, res) => {
+  router.post("/", async (req, res) => {
     const date = req.body?.date;
     if (!isDate(date)) {
       invalidDate(res);
@@ -35,7 +41,7 @@ export function calendarRoutes(calendar: Calendar): express.Router {
     res.status(201).json({ date });
   });
 
-  router.delete("/admin/holidays/:date", async (req, res) => {
+  router.delete("/:date", async (req, res) => {
     const { date } = req.params;
     if (!isDate(date)) {
       invalidDate(res);

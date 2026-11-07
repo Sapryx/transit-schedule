@@ -36,11 +36,14 @@ export function isDate(value: unknown): value is string {
   return !Number.isNaN(time) && new Date(time).toISOString().startsWith(value);
 }
 
+const julianToGregorianDays = 13;
+const radunitsaDaysAfterEaster = 9;
+
 function radunitsa(year: number): string {
   const d = (19 * (year % 19) + 15) % 30;
   const e = (2 * (year % 4) + 4 * (year % 7) - d + 34) % 7;
   const julianEaster = new Date(Date.UTC(year, Math.floor((d + e + 114) / 31) - 1, ((d + e + 114) % 31) + 1));
-  return addDays(julianEaster, 13 + 9);
+  return addDays(julianEaster, julianToGregorianDays + radunitsaDaysAfterEaster);
 }
 
 export function belarusPublicHolidays(year: number): string[] {

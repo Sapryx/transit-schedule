@@ -2,7 +2,7 @@ import express from "express";
 import type pg from "pg";
 import type { Auth } from "./auth.ts";
 import type { Calendar } from "./calendar.ts";
-import { calendarRoutes } from "./calendarRoutes.ts";
+import { dayTypeRoutes, holidayRoutes } from "./calendarRoutes.ts";
 
 export function createApp({ pool, auth, calendar }: { pool: pg.Pool; auth: Auth; calendar: Calendar }): express.Express {
   const app = express();
@@ -24,6 +24,7 @@ export function createApp({ pool, auth, calendar }: { pool: pg.Pool; auth: Auth;
     res.json(session);
   });
   app.use("/api/admin", auth.requireDispatcher);
-  app.use("/api", calendarRoutes(calendar));
+  app.use("/api/admin/holidays", holidayRoutes(calendar));
+  app.use("/api", dayTypeRoutes(calendar));
   return app;
 }
