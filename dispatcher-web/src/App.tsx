@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from "react-router";
 import { useDependencies } from "./DependenciesContext.tsx";
 import { HolidaysPage } from "./HolidaysPage.tsx";
 import { Layout } from "./Layout.tsx";
+import { OsmSyncPage } from "./OsmSyncPage.tsx";
 import { SignInPage } from "./SignInPage.tsx";
 
 function HomePage() {
@@ -28,6 +29,7 @@ export function App() {
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="holidays" element={<HolidaysPage />} />
+        <Route path="osm-sync" element={<OsmSyncPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

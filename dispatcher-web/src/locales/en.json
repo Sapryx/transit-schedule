@@ -13,6 +13,7 @@
   "nav": {
     "home": "Home",
     "holidays": "Holidays",
+    "osmSync": "Sync with OSM",
     "signOut": "Sign out"
   },
   "home": {
@@ -27,6 +28,36 @@
     "empty": "No holidays.",
     "duplicate": "This date is already a holiday.",
     "invalid": "Enter a valid date.",
+    "failed": "Something went wrong. Try again later."
+  },
+  "osmSync": {
+    "heading": "Sync with OSM",
+    "start": "Start sync",
+    "running": "Sync is running…",
+    "kind": "Object",
+    "created": "Created",
+    "updated": "Updated",
+    "missing": "Missing from OSM",
+    "kinds": {
+      "stops": "Stops",
+      "platforms": "Platforms",
+      "routes": "Routes",
+      "directions": "Directions"
+    },
+    "needsReview": "Directions needing review",
+    "noReview": "No directions need review.",
+    "skipped": "Skipped routes",
+    "skippedRoute": "{{ref}}: {{reason}}",
+    "noNumber": "No number",
+    "reasons": {
+      "no_ref": "route without a number",
+      "regional": "regional route",
+      "national": "national route",
+      "international": "international route",
+      "no_platforms": "route without platforms"
+    },
+    "inProgress": "Another sync is already running. Wait for it to finish.",
+    "unavailable": "OpenStreetMap is unavailable. Try again later.",
     "failed": "Something went wrong. Try again later."
   }
 }
