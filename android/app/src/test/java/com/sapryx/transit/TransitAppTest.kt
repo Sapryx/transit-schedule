@@ -1,8 +1,11 @@
 package com.sapryx.transit
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,19 +18,25 @@ class TransitAppTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    @Test
-    @Config(qualifiers = "en")
-    fun showsAppTitleInEnglish() {
+    private fun opensEveryTab(tabs: List<String>) {
         composeRule.setContent { TransitApp() }
 
-        composeRule.onNodeWithText("Transit Schedule").assertIsDisplayed()
+        tabs.forEach { tab ->
+            composeRule.onNodeWithText(tab).performClick()
+            composeRule.onNodeWithTag("placeholder").assertIsDisplayed()
+            composeRule.onNodeWithTag("placeholder").assertTextEquals(tab)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "en")
+    fun opensEveryTabInEnglish() {
+        opensEveryTab(listOf("Stops", "Journey", "Map", "Favourites", "Routes"))
     }
 
     @Test
     @Config(qualifiers = "ru")
-    fun showsAppTitleInRussian() {
-        composeRule.setContent { TransitApp() }
-
-        composeRule.onNodeWithText("Расписание транспорта").assertIsDisplayed()
+    fun opensEveryTabInRussian() {
+        opensEveryTab(listOf("Остановки", "Поездка", "Карта", "Избранное", "Маршруты"))
     }
 }

@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Расписание транспорта</string>
+    <string name="tab_routes">Маршруты</string>
+    <string name="tab_stops">Остановки</string>
+    <string name="tab_journey">Поездка</string>
+    <string name="tab_map">Карта</string>
+    <string name="tab_favourites">Избранное</string>
 </resources>
