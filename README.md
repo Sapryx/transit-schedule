@@ -8,23 +8,27 @@ The apps support English and Russian.
 
 Passenger — Android app, no registration:
 
-- R1 list of routes (bus, trolleybus, …) and their stops;
-- R2 schedule of a selected stop, weekdays and weekends;
-- R3 trip search between two stops by departure time and day type, with transfers (up to 2);
+- R1 list of routes (bus, trolleybus) and their stops;
+- R2 schedule of a selected stop, weekdays and weekends, with upcoming arrivals;
+- R3 journey search between two stops for a date and time, with up to 2 transfers;
 - R4 stops and routes on an OpenStreetMap map;
-- R5 favourite stops and routes stored on the device.
+- R5 favourite stops and routes stored on the device; the app works online only.
 
 Dispatcher — web panel with authorization:
 
-- R6 sign-in with a single account whose login and password come from compose environment variables;
-- R7 create, edit and delete routes, stops (placed by clicking the map) and schedules.
+- R6 sign-in with a single account whose login and password come from compose environment variables
+  (12-hour session);
+- R7 manage schedules (departures, travel offsets) and holidays, withdraw routes from service, correct English
+  stop names, delete objects missing from OSM, run OSM sync; a map shows stops and their trips.
 
 Data:
 
-- R8 Gomel routes and stops with coordinates are imported automatically from OpenStreetMap (Overpass API);
-  the dispatcher corrects them in the panel;
+- R8 the network (stops, platforms, routes, directions) comes only from OpenStreetMap (Overpass API) and is
+  read-only in the panel; see `docs/adr/0001-network-from-osm-schedules-by-dispatcher.md`;
 - R9 schedules are entered manually in the panel for now; a schedule import source will be chosen later,
-  so schedule import is a replaceable module.
+  so schedule entry is a replaceable module.
+
+Domain language: `CONTEXT.md`.
 
 Server and deployment:
 
