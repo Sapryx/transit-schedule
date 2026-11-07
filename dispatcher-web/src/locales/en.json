@@ -1,5 +1,20 @@
 {
   "app": {
     "title": "Transit Dispatcher"
+  },
+  "signIn": {
+    "heading": "Sign in",
+    "login": "Login",
+    "password": "Password",
+    "submit": "Sign in",
+    "invalidCredentials": "Wrong login or password.",
+    "failed": "Could not sign in. Try again later."
+  },
+  "nav": {
+    "home": "Home",
+    "signOut": "Sign out"
+  },
+  "home": {
+    "welcome": "Choose a section in the navigation."
   }
 }
