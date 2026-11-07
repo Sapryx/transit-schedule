@@ -1,10 +1,11 @@
 import { asValue } from "awilix";
 import { describe, expect, it } from "vitest";
 import { buildContainer } from "./container.ts";
+import { testConfig } from "./testing/testConfig.ts";
 
 describe("clock", () => {
   it("tells the current time and can be replaced", () => {
-    const container = buildContainer({ port: 0, databaseUrl: "postgres://localhost/unused" });
+    const container = buildContainer(testConfig());
     const before = Date.now();
     expect(container.cradle.clock.now().getTime()).toBeGreaterThanOrEqual(before);
 

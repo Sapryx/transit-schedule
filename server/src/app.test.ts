@@ -1,6 +1,7 @@
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { buildContainer } from "./container.ts";
+import { testConfig } from "./testing/testConfig.ts";
 import { useTestServer } from "./testing/testServer.ts";
 
 describe("GET /health", () => {
@@ -14,7 +15,7 @@ describe("GET /health", () => {
   });
 
   it("reports an unavailable database instead of crashing", async () => {
-    const container = buildContainer({ port: 0, databaseUrl: "postgres://transit:transit@127.0.0.1:1/transit" });
+    const container = buildContainer(testConfig({ databaseUrl: "postgres://transit:transit@127.0.0.1:1/transit" }));
 
     const response = await request(container.cradle.app).get("/health");
 

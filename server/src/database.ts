@@ -1,5 +1,5 @@
 import pg from "pg";
-import type { Config } from "./container.ts";
+import type { Config } from "./config.ts";
 
 export function createPool({ config }: { config: Config }): pg.Pool {
   const pool = new pg.Pool({ connectionString: config.databaseUrl, connectionTimeoutMillis: 3000 });

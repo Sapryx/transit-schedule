@@ -3,6 +3,7 @@ import type { AwilixContainer } from "awilix";
 import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 import { buildContainer, type Cradle } from "../container.ts";
 import { migrate, migrationsDirectory } from "../migrations.ts";
+import { testConfig } from "./testConfig.ts";
 
 export interface TestServer {
   container: AwilixContainer<Cradle>;
@@ -16,13 +17,13 @@ export function useTestServer(): TestServer {
   beforeAll(async () => {
     database = await new PostgreSqlContainer("postgres:18-alpine").start();
     server.databaseUrl = database.getConnectionUri();
-    const container = buildContainer({ port: 0, databaseUrl: server.databaseUrl });
+    const container = buildContainer(testConfig({ databaseUrl: server.databaseUrl }));
     await migrate(container.cradle.pool, migrationsDirectory);
     await container.dispose();
   }, 120_000);
 
   beforeEach(async () => {
-    server.container = buildContainer({ port: 0, databaseUrl: server.databaseUrl });
+    server.container = buildContainer(testConfig({ databaseUrl: server.databaseUrl }));
     await server.container.cradle.pool.query(`
       DO $$
       DECLARE tables text;

@@ -54,7 +54,7 @@ docker compose up -d --build
 - dispatcher panel: http://localhost:8088 (API proxied at `/api`)
 
 Environment variables (optional, defaults in `docker-compose.yml`): `DB_PASSWORD`, `DISPATCHER_LOGIN`,
-`DISPATCHER_PASSWORD`.
+`DISPATCHER_PASSWORD`, `JWT_SECRET`; the server refuses to start when any of the last three is empty.
 
 ## Develop
 
