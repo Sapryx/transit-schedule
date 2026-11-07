@@ -19,6 +19,7 @@ services:
       DATABASE_URL: postgres://transit:${DB_PASSWORD:-transit}@db:5432/transit
       DISPATCHER_LOGIN: ${DISPATCHER_LOGIN:-dispatcher}
       DISPATCHER_PASSWORD: ${DISPATCHER_PASSWORD:-dispatcher}
+      JWT_SECRET: ${JWT_SECRET:-development-jwt-secret}
     ports:
       - "3000:3000"
     depends_on:

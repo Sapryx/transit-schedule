@@ -4,7 +4,12 @@ import { buildContainer } from "./container.ts";
 
 describe("GET /health", () => {
   it("reports that the server is up", async () => {
-    const { app } = buildContainer({ port: 0 }).cradle;
+    const { app } = buildContainer({
+      port: 0,
+      dispatcherLogin: "dispatcher",
+      dispatcherPassword: "secret",
+      jwtSecret: "test-jwt-secret",
+    }).cradle;
 
     const response = await request(app).get("/health");
 
