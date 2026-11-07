@@ -12,9 +12,21 @@
   },
   "nav": {
     "home": "Home",
+    "holidays": "Holidays",
     "signOut": "Sign out"
   },
   "home": {
     "welcome": "Choose a section in the navigation."
+  },
+  "holidays": {
+    "heading": "Holidays",
+    "showPast": "Show past holidays",
+    "date": "Date",
+    "add": "Add",
+    "remove": "Remove",
+    "empty": "No holidays.",
+    "duplicate": "This date is already a holiday.",
+    "invalid": "Enter a valid date.",
+    "failed": "Something went wrong. Try again later."
   }
 }
