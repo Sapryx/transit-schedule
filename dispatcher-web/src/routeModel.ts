@@ -5,6 +5,9 @@ export interface Name {
 
 export const modes = ["bus", "trolleybus"] as const;
 
+export const dayTypes = ["weekday", "weekend"] as const;
+export type DayType = (typeof dayTypes)[number];
+
 export interface DirectionSummary {
   id: number;
   name: { from: Name; to: Name; via: Name | null };
@@ -34,7 +37,7 @@ export interface DirectionPlatform {
 
 export interface DirectionDetail extends DirectionSummary {
   platforms: DirectionPlatform[];
-  departures: { weekday: number[]; weekend: number[] };
+  departures: Record<DayType, number[]>;
   path: [number, number][];
 }
 

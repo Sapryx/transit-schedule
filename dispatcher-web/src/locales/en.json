@@ -88,6 +88,30 @@
     "stop": "Stop",
     "travelOffset": "Travel offset, min",
     "osmHint": "Stops, platform sequences and paths come from OpenStreetMap and cannot be changed here. Correct them in OpenStreetMap and run a sync.",
-    "notFound": "Route not found."
+    "notFound": "Route not found.",
+    "offsetAt": "Travel offset at {{stop}}",
+    "saveOffsets": "Save travel offsets",
+    "saved": "Saved.",
+    "invalidOffsets": "Travel offsets must be whole minutes that never decrease.",
+    "dayType": "Day type",
+    "dayTypes": {
+      "weekday": "Weekdays",
+      "weekend": "Weekends"
+    },
+    "departures": "Departures",
+    "noDepartures": "No departures.",
+    "departureAt": "Departure {{time}}",
+    "remove": "Delete",
+    "removeDeparture": "Delete departure {{time}}",
+    "newDeparture": "New departure",
+    "add": "Add",
+    "from": "From",
+    "to": "To",
+    "every": "Every, min",
+    "addSeries": "Add series",
+    "invalidTime": "Enter a time as HH:MM; after midnight continue past 24:00, e.g. 24:20.",
+    "invalidSeries": "Enter a start, an end not earlier than the start and an interval of at least 1 minute.",
+    "duplicateDeparture": "This departure already exists.",
+    "trips": "Trips"
   }
 }

@@ -3,6 +3,7 @@ import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it } from "vitest";
 import { apiServer } from "./testing/apiServer.ts";
 import { renderApp } from "./testing/renderApp.tsx";
+import { routeDetail, routes } from "./testing/routeFixtures.ts";
 
 const locales = [
   {
@@ -58,65 +59,6 @@ const locales = [
     stops: ["Волотова", "Храм", "Вокзал"],
   },
 ];
-
-const name = (ru: string, en: string) => ({ ru, en });
-const volotova = name("Волотова", "Volotova");
-const khram = name("Храм", "Khram");
-const vokzal = name("Вокзал", "Vokzal");
-const direction = (id: number, state: Partial<{ scheduled: boolean; needsReview: boolean; missingFromOsm: boolean }> = {}) => ({
-  id,
-  name: { from: vokzal, to: volotova, via: null },
-  scheduled: false,
-  needsReview: false,
-  missingFromOsm: false,
-  ...state,
-});
-const route = (id: number, number: string, mode: string, directions: ReturnType<typeof direction>[], state: Partial<{ withdrawn: boolean; missingFromOsm: boolean }> = {}) => ({
-  id,
-  number,
-  mode,
-  withdrawn: false,
-  missingFromOsm: false,
-  directions,
-  ...state,
-});
-
-const routes = [
-  route(1, "43", "bus", [direction(1, { scheduled: true }), direction(2, { scheduled: true })]),
-  route(2, "2", "trolleybus", [direction(3)]),
-  route(3, "15", "trolleybus", [direction(4, { scheduled: true, needsReview: true }), direction(5, { scheduled: true })]),
-  route(4, "20", "bus", [direction(6, { missingFromOsm: true })], { missingFromOsm: true }),
-  route(5, "10а", "bus", [direction(7, { scheduled: true })], { withdrawn: true }),
-];
-
-const platform = (platformId: number, stopName: typeof vokzal, travelOffset: number | null) => ({
-  platformId,
-  stopId: platformId,
-  stopName,
-  lat: 52.4,
-  lon: 31,
-  travelOffset,
-  interpolated: false,
-});
-
-const routeDetail = {
-  ...route(3, "15", "trolleybus", []),
-  directions: [
-    {
-      ...direction(4, { scheduled: true, needsReview: true }),
-      name: { from: volotova, to: vokzal, via: khram },
-      platforms: [platform(10, volotova, 0), platform(11, khram, 4), platform(12, vokzal, 9)],
-      departures: { weekday: [360], weekend: [] },
-      path: [[52.4, 31], [52.41, 31.01]],
-    },
-    {
-      ...direction(5),
-      platforms: [platform(12, vokzal, null), platform(10, volotova, null)],
-      departures: { weekday: [], weekend: [] },
-      path: [],
-    },
-  ],
-};
 
 beforeEach(() => {
   localStorage.setItem("session", JSON.stringify({ token: "valid-token", expiresAt: "2999-01-01T00:00:00.000Z" }));
@@ -210,19 +152,19 @@ describe.each(locales)("route page in $language", (text) => {
     expect(await screen.findByRole("heading", { name: text.routeHeading })).toBeInTheDocument();
   });
 
-  it("shows each direction's platform sequence read-only with the OSM hint", async () => {
+  it("shows each direction's platform sequence with its travel offsets and the OSM hint", async () => {
     renderApp({ language: text.language, path: "/routes/3" });
 
     expect(await screen.findByRole("heading", { name: text.routeHeading })).toBeInTheDocument();
     expect(screen.getByText(text.hint)).toBeInTheDocument();
+    const offsets = (table: HTMLElement) =>
+      within(table).getAllByRole("row").slice(1).map((row) => [row.textContent, within(row).queryByRole("spinbutton")?.getAttribute("value") ?? null]);
     const first = screen.getByRole("table", { name: text.direction });
     expect(within(first).getAllByRole("columnheader").map((header) => header.textContent)).toEqual(["#", text.stop, text.travelOffset]);
-    expect(within(first).getAllByRole("row").slice(1).map((row) => row.textContent)).toEqual([`1${text.stops[0]}0`, `2${text.stops[1]}4`, `3${text.stops[2]}9`]);
+    expect(offsets(first)).toEqual([[`1${text.stops[0]}0`, null], [`2${text.stops[1]}`, "4"], [`3${text.stops[2]}`, "9"]]);
     expect(within(screen.getByRole("region", { name: text.direction })).getByText(`${text.scheduled}, ${text.needsReview}`)).toBeInTheDocument();
     const second = screen.getByRole("table", { name: text.plainDirection });
-    expect(within(second).getAllByRole("row").slice(1).map((row) => row.textContent)).toEqual([`1${text.stops[2]}—`, `2${text.stops[0]}—`]);
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-    expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
+    expect(offsets(second)).toEqual([[`1${text.stops[2]}0`, null], [`2${text.stops[0]}`, ""]]);
   });
 
   it("says when the route does not exist", async () => {
