@@ -111,6 +111,110 @@ describe("passenger network", () => {
     });
   });
 
+  async function scheduleAll(number: string) {
+    const { directions } = await adminRoute(number);
+    await Promise.all(directions.map((_, index) => schedule(number, index)));
+    return adminRoute(number);
+  }
+
+  function servedPlatforms(route: RouteSummary<DirectionDetail>, stopId: number) {
+    const platforms = route.directions.flatMap((direction) => direction.platforms).filter((platform) => platform.stopId === stopId);
+    return [...new Map(platforms.map((platform) => [platform.platformId, { id: platform.platformId, lat: platform.lat, lon: platform.lon }])).values()].sort((a, b) => a.id - b.id);
+  }
+
+  const rogachyovskaya = (route: RouteSummary<DirectionDetail>) =>
+    route.directions.flatMap((direction) => direction.platforms).find((platform) => platform.stopName.ru === "Улица Рогачёвская")!;
+
+  describe("GET /api/stops", () => {
+    it("is public and finds nothing until a direction is scheduled", async () => {
+      const response = await passenger("/api/stops?query=Рогачёвская");
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([]);
+    });
+
+    it.each(["рогачев", "РОГАЧЁВСКАЯ", "Rogach", "ULITSA ROGACH"])("finds a stop by %s with its routes and platforms", async (query) => {
+      const route = await scheduleAll("2");
+      const stop = rogachyovskaya(route);
+
+      const response = await passenger(`/api/stops?query=${encodeURIComponent(query)}`, "en");
+
+      expect(response.headers["content-language"]).toBe("en");
+      expect(response.body).toEqual([
+        { id: stop.stopId, name: stop.stopName.en, routes: [{ id: route.id, number: "2", mode: "trolleybus" }], platforms: servedPlatforms(route, stop.stopId) },
+      ]);
+    });
+
+    it("names stops in Russian when asked", async () => {
+      await scheduleAll("2");
+
+      const response = await passenger(`/api/stops?query=${encodeURIComponent("рогачев")}`, "ru");
+
+      expect(response.headers["content-language"]).toBe("ru");
+      expect(response.body.map((stop: { name: string }) => stop.name)).toEqual(["Улица Рогачёвская"]);
+    });
+
+    it("lists the routes passing a stop sorted naturally", async () => {
+      await Promise.all([scheduleAll("2"), scheduleAll("15"), scheduleAll("20"), scheduleAll("43")]);
+      const response = await passenger("/api/stops");
+
+      const shared = response.body.find((stop: { routes: unknown[] }) => stop.routes.length > 1);
+      const numbers = shared.routes.map((route: { number: string }) => route.number);
+      expect(numbers).toEqual([...numbers].sort(new Intl.Collator("en", { numeric: true }).compare));
+    });
+
+    it("lists all visible stops sorted by name without a query", async () => {
+      const route = await scheduleAll("2");
+
+      const response = await passenger("/api/stops", "ru");
+
+      const stops = new Map(route.directions.flatMap((direction) => direction.platforms.map((platform) => [platform.stopId, platform.stopName.ru])));
+      expect(response.body.map((stop: { name: string }) => stop.name)).toEqual([...stops.values()].sort(new Intl.Collator("ru").compare));
+    });
+
+    it("hides stops of withdrawn routes", async () => {
+      const route = await scheduleAll("2");
+      await admin("patch", `/api/admin/routes/${route.id}`, { withdrawn: true });
+
+      expect((await passenger("/api/stops")).body).toEqual([]);
+    });
+  });
+
+  describe("GET /api/stops/:id", () => {
+    it("returns the stop with its routes, their directions through it and platforms", async () => {
+      const route = await scheduleAll("2");
+      const stop = rogachyovskaya(route);
+      const directionIds = route.directions.filter((direction) => direction.platforms.some((platform) => platform.stopId === stop.stopId)).map((direction) => direction.id);
+
+      const response = await passenger(`/api/stops/${stop.stopId}`, "ru");
+
+      expect(response.status).toBe(200);
+      expect(response.headers["content-language"]).toBe("ru");
+      expect(response.body).toEqual({
+        id: stop.stopId,
+        name: "Улица Рогачёвская",
+        routes: [{ id: route.id, number: "2", mode: "trolleybus", directionIds }],
+        platforms: servedPlatforms(route, stop.stopId),
+      });
+    });
+
+    it("returns 404 for a stop no scheduled direction passes", async () => {
+      const stop = rogachyovskaya(await adminRoute("2"));
+
+      const response = await passenger(`/api/stops/${stop.stopId}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body).toEqual({ error: "not_found" });
+    });
+
+    it.each(["999999", "abc"])("returns 404 for an unknown stop %s", async (id) => {
+      const response = await passenger(`/api/stops/${id}`, "ru");
+
+      expect(response.status).toBe(404);
+      expect(response.headers["content-language"]).toBe("ru");
+    });
+  });
+
   describe("GET /api/routes/:id", () => {
     it("returns the scheduled directions with their stops in travel order and path", async () => {
       await schedule("15", 1);
