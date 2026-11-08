@@ -73,8 +73,13 @@ _Avoid_: Departures board, next buses
 **Journey**:
 A way to get from one stop to another starting no earlier than a requested date and time: a chain of one
 to three trips joined by transfers. Up to five journeys starting within two hours are offered, each only if no
-other journey arrives earlier with no more transfers.
+other journey departs no earlier, arrives no later and has no more transfers.
 _Avoid_: Route (a route is a line, not a passenger's path), itinerary, connection
+
+**Leg**:
+The part of a journey spent on one trip: the route and direction, the boarding stop with its departure and the
+alighting stop with its arrival.
+_Avoid_: Segment, section, hop
 
 **Transfer**:
 Leaving one trip and boarding another at the same stop, possibly at a different platform; the next trip must
