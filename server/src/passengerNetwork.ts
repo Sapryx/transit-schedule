@@ -69,12 +69,16 @@ const byNumber = new Intl.Collator("en", { numeric: true });
 
 const byRoute = (a: StopRoute, b: StopRoute) => byNumber.compare(a.number, b.number) || a.mode.localeCompare(b.mode);
 
+export function localDirectionName({ from, to, via }: DirectionName, language: Language): string {
+  return `${from[language]} → ${to[language]}${via ? ` ${viaWord[language]} ${via[language]}` : ""}`;
+}
+
 function localize<D>(route: Row<D>, language: Language): PassengerRoute<D> {
   return {
     ...route,
-    directions: route.directions.map(({ name: { from, to, via }, stops, ...direction }) => ({
+    directions: route.directions.map(({ name, stops, ...direction }) => ({
       ...direction,
-      name: `${from[language]} → ${to[language]}${via ? ` ${viaWord[language]} ${via[language]}` : ""}`,
+      name: localDirectionName(name, language),
       ...(stops && { stops: stops.map((stop) => ({ ...stop, name: stop.name[language] })) }),
     })) as D[],
   };
