@@ -15,7 +15,7 @@ import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
-enum class Endpoint { From, To }
+enum class JourneyEnd { Start, Destination }
 
 @HiltViewModel
 class JourneyViewModel @Inject constructor(private val api: JourneysApi, private val clock: Clock) : ViewModel() {
@@ -34,10 +34,10 @@ class JourneyViewModel @Inject constructor(private val api: JourneysApi, private
     var journeys by mutableStateOf<Loadable<List<Journey>>?>(null)
         private set
 
-    fun choose(endpoint: Endpoint, stop: Stop) {
-        when (endpoint) {
-            Endpoint.From -> from = stop
-            Endpoint.To -> to = stop
+    fun choose(end: JourneyEnd, stop: Stop) {
+        when (end) {
+            JourneyEnd.Start -> from = stop
+            JourneyEnd.Destination -> to = stop
         }
         search()
     }

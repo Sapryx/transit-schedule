@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -176,6 +177,30 @@ class JourneyTest {
 
         composeRule.waitUntil(5_000) { summaries() == listOf("09:35 → 10:01") }
         composeRule.onNodeWithTag("journey-time").assertTextEquals("09:30")
+    }
+
+    @Test
+    @Config(qualifiers = "en-w411dp-h891dp")
+    fun labelsTheSwapButtonAndDialogButtons() {
+        openJourney("Journey")
+
+        composeRule.onNodeWithContentDescription("Swap stops").assertIsDisplayed()
+        composeRule.onNodeWithTag("journey-time").performClick()
+        composeRule.onNodeWithText("OK").assertIsDisplayed()
+        composeRule.onNodeWithText("Cancel").performClick()
+        composeRule.onNodeWithTag("journey-time").assertTextEquals("08:00")
+    }
+
+    @Test
+    @Config(qualifiers = "ru-w411dp-h891dp")
+    fun labelsTheSwapButtonAndDialogButtonsInRussian() {
+        openJourney("Поездка")
+
+        composeRule.onNodeWithContentDescription("Поменять местами").assertIsDisplayed()
+        composeRule.onNodeWithTag("journey-date").performClick()
+        composeRule.onNodeWithText("ОК").assertIsDisplayed()
+        composeRule.onNodeWithText("Отмена").performClick()
+        composeRule.onNodeWithTag("journey-time").assertTextEquals("08:00")
     }
 
     @Test

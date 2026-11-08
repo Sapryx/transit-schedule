@@ -56,7 +56,7 @@ private fun String.clockTime() = OffsetDateTime.parse(this).format(clockTime)
 
 @Composable
 fun JourneyScreen(
-    onPickStop: (Endpoint) -> Unit,
+    onPickStop: (JourneyEnd) -> Unit,
     onRouteClick: (Int) -> Unit,
     onStopClick: (Int) -> Unit,
     viewModel: JourneyViewModel = hiltViewModel(),
@@ -64,8 +64,8 @@ fun JourneyScreen(
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                StopField(viewModel.from, R.string.journey_from, "journey-from") { onPickStop(Endpoint.From) }
-                StopField(viewModel.to, R.string.journey_to, "journey-to") { onPickStop(Endpoint.To) }
+                StopField(viewModel.from, R.string.journey_from, "journey-from") { onPickStop(JourneyEnd.Start) }
+                StopField(viewModel.to, R.string.journey_to, "journey-to") { onPickStop(JourneyEnd.Destination) }
             }
             IconButton(onClick = viewModel::swap, modifier = Modifier.testTag("journey-swap")) {
                 Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.journey_swap))

@@ -24,7 +24,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.sapryx.transit.journeys.Endpoint
+import com.sapryx.transit.journeys.JourneyEnd
 import com.sapryx.transit.journeys.JourneyScreen
 import com.sapryx.transit.journeys.JourneyViewModel
 import com.sapryx.transit.navigation.Tab
@@ -42,7 +42,7 @@ private fun Placeholder(text: String, tag: String) {
     }
 }
 
-private const val ENDPOINT = "endpoint"
+private const val JOURNEY_END = "end"
 
 @Composable
 fun TransitApp() {
@@ -90,12 +90,12 @@ fun TransitApp() {
                         onStopClick = { navController.navigate("stop/$it") },
                     )
                 }
-                composable("pick-stop/{$ENDPOINT}") { entry ->
+                composable("pick-stop/{$JOURNEY_END}") { entry ->
                     val journeyEntry = remember(entry) { navController.getBackStackEntry(Tab.Journey.name) }
                     val journeyViewModel: JourneyViewModel = hiltViewModel(journeyEntry)
-                    val endpoint = Endpoint.valueOf(checkNotNull(entry.arguments?.getString(ENDPOINT)))
+                    val end = JourneyEnd.valueOf(checkNotNull(entry.arguments?.getString(JOURNEY_END)))
                     StopsScreen(onStopClick = {
-                        journeyViewModel.choose(endpoint, it)
+                        journeyViewModel.choose(end, it)
                         navController.popBackStack()
                     })
                 }
