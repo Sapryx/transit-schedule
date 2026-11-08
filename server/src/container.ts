@@ -13,6 +13,7 @@ import { createNetworkSync, type NetworkSync } from "./osm/networkSync.ts";
 import { createOverpassSource, type OsmSource } from "./osm/osmSource.ts";
 import { createPassengerNetwork, type PassengerNetwork } from "./passengerNetwork.ts";
 import { createSchedule, type Schedule } from "./schedule.ts";
+import { createStopSchedule, type StopSchedule } from "./stopSchedule.ts";
 
 export interface Cradle {
   config: Config;
@@ -25,6 +26,7 @@ export interface Cradle {
   schedule: Schedule;
   passengerNetwork: PassengerNetwork;
   journeyPlanner: JourneyPlanner;
+  stopSchedule: StopSchedule;
   calendar: Calendar;
   app: express.Express;
 }
@@ -42,6 +44,7 @@ export function buildContainer(config: Config) {
     schedule: asFunction(createSchedule).singleton(),
     passengerNetwork: asFunction(createPassengerNetwork).singleton(),
     journeyPlanner: asFunction(createJourneyPlanner).singleton(),
+    stopSchedule: asFunction(createStopSchedule).singleton(),
     calendar: asFunction(createCalendar).singleton(),
     app: asFunction(createApp).singleton(),
   });

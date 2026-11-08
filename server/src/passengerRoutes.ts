@@ -9,7 +9,7 @@ function language(req: express.Request, res: express.Response): Language {
   return chosen;
 }
 
-function byId<T>(find: (id: number, language: Language) => Promise<T | null>): express.RequestHandler<{ id: string }> {
+export function byId<T>(find: (id: number, language: Language) => Promise<T | null>): express.RequestHandler<{ id: string }> {
   return async (req, res) => {
     const chosen = language(req, res);
     const found = isId(req.params.id) ? await find(Number(req.params.id), chosen) : null;

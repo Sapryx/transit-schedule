@@ -11,6 +11,8 @@ import type { PassengerNetwork } from "./passengerNetwork.ts";
 import { passengerRoutes } from "./passengerRoutes.ts";
 import type { Schedule } from "./schedule.ts";
 import { scheduleRoutes } from "./scheduleRoutes.ts";
+import type { StopSchedule } from "./stopSchedule.ts";
+import { stopScheduleRoutes } from "./stopScheduleRoutes.ts";
 
 export function createApp({
   pool,
@@ -21,6 +23,7 @@ export function createApp({
   schedule,
   passengerNetwork,
   journeyPlanner,
+  stopSchedule,
 }: {
   pool: pg.Pool;
   auth: Auth;
@@ -30,6 +33,7 @@ export function createApp({
   schedule: Schedule;
   passengerNetwork: PassengerNetwork;
   journeyPlanner: JourneyPlanner;
+  stopSchedule: StopSchedule;
 }): express.Express {
   const app = express();
   app.use(express.json());
@@ -65,5 +69,6 @@ export function createApp({
   app.use("/api/admin", scheduleRoutes(schedule));
   app.use("/api", dayTypeRoutes(calendar));
   app.use("/api", passengerRoutes(passengerNetwork, journeyPlanner));
+  app.use("/api", stopScheduleRoutes(stopSchedule));
   return app;
 }

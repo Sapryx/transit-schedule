@@ -13,6 +13,7 @@ import androidx.test.core.app.ActivityScenario
 import com.sapryx.transit.MainActivity
 import com.sapryx.transit.network.ApiBaseUrlModule
 import com.sapryx.transit.testing.FixtureServer
+import com.sapryx.transit.time.ClockModule
 import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -27,9 +28,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 
 @HiltAndroidTest
-@UninstallModules(ApiBaseUrlModule::class)
+@UninstallModules(ApiBaseUrlModule::class, ClockModule::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = HiltTestApplication::class)
 class StopsTest {
@@ -43,6 +47,9 @@ class StopsTest {
 
     @BindValue
     val baseUrl: HttpUrl = fixtures.url
+
+    @BindValue
+    val clock: Clock = Clock.fixed(Instant.parse("2026-11-09T07:12:00Z"), ZoneId.of("Europe/Minsk"))
 
     @After
     fun tearDown() {

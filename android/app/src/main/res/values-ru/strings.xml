@@ -14,6 +14,9 @@
     <string name="routes_empty">Нет маршрутов</string>
     <string name="stops_search">Название остановки</string>
     <string name="stops_empty">Нет остановок</string>
+    <string name="day_type_weekday">Будни</string>
+    <string name="day_type_weekend">Выходные</string>
+    <string name="schedule_empty">В эти дни рейсов нет</string>
     <string name="load_error">Не удалось загрузить данные. Проверьте подключение.</string>
     <string name="retry">Повторить</string>
     <string name="ok">ОК</string>

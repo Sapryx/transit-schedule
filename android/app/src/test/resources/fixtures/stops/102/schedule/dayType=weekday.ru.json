@@ -1,0 +1,18 @@
+[
+  {
+    "routeId": 3,
+    "number": "10",
+    "mode": "bus",
+    "directionId": 30,
+    "directionName": "Вокзал → Любенский",
+    "arrivals": [365, 380, 395, 610, 625, 1450]
+  },
+  {
+    "routeId": 2,
+    "number": "15",
+    "mode": "trolleybus",
+    "directionId": 21,
+    "directionName": "Вокзал → Волотова",
+    "arrivals": []
+  }
+]

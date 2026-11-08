@@ -6,8 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sapryx.transit.calendar.CalendarApi
+import com.sapryx.transit.calendar.DayType
 import com.sapryx.transit.ui.Loadable
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Clock
+import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,11 +28,34 @@ class StopsViewModel @Inject constructor(api: StopsApi) : ViewModel() {
     }
 }
 
+data class DaySchedule(val entries: List<StopScheduleEntry>, val nowMinutes: Int?)
+
 @HiltViewModel
-class StopViewModel @Inject constructor(api: StopsApi, savedStateHandle: SavedStateHandle) : ViewModel() {
+class StopViewModel @Inject constructor(
+    api: StopsApi,
+    calendarApi: CalendarApi,
+    clock: Clock,
+    savedStateHandle: SavedStateHandle,
+) : ViewModel() {
     private val stopId: Int = checkNotNull(savedStateHandle[STOP_ID])
+    private var todayType: DayType? = null
+
+    var dayType by mutableStateOf<DayType?>(null)
+        private set
 
     val stop = Loadable(viewModelScope) { api.stop(stopId) }
+
+    val schedule = Loadable(viewModelScope) {
+        val today = todayType ?: calendarApi.dayType(LocalDate.now(clock).toString()).dayType.also { todayType = it }
+        val selected = dayType ?: today.also { dayType = it }
+        val now = LocalTime.now(clock)
+        DaySchedule(api.schedule(stopId, selected.query), (now.hour * 60 + now.minute).takeIf { selected == today })
+    }
+
+    fun select(dayType: DayType) {
+        this.dayType = dayType
+        schedule.load()
+    }
 
     companion object {
         const val STOP_ID = "stopId"

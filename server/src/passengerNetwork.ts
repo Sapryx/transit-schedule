@@ -65,7 +65,7 @@ type Row<D> = PassengerRoute<Omit<D, "name" | "stops"> & { name: DirectionName; 
 
 const viaWord: Record<Language, string> = { en: "via", ru: "через" };
 
-const byNumber = new Intl.Collator("en", { numeric: true });
+export const byNumber = new Intl.Collator("en", { numeric: true });
 
 const byRoute = (a: StopRoute, b: StopRoute) => byNumber.compare(a.number, b.number) || a.mode.localeCompare(b.mode);
 
@@ -98,7 +98,7 @@ const routeQuery = (detail: string, where: string) => `
 
 type StopRow = Omit<PassengerStopSummary<StopRouteDetail>, "name"> & { name: Name };
 
-const visible = `
+export const visible = `
   SELECT p.stop_id, p.id AS platform_id, d.route_id, d.id AS direction_id
   FROM routes r JOIN directions d ON d.route_id = r.id
   JOIN direction_platforms dp ON dp.direction_id = d.id JOIN platforms p ON p.id = dp.platform_id
