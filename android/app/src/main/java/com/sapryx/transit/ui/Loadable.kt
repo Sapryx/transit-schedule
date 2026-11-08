@@ -1,6 +1,7 @@
 package com.sapryx.transit.ui
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,13 +22,16 @@ class Loadable<T>(private val scope: CoroutineScope, private val fetch: suspend 
     private val mutableState = MutableStateFlow<LoadState<T>>(LoadState.Loading)
     val state: StateFlow<LoadState<T>> = mutableState.asStateFlow()
 
+    private var job: Job? = null
+
     init {
         load()
     }
 
     fun load() {
+        job?.cancel()
         mutableState.value = LoadState.Loading
-        scope.launch {
+        job = scope.launch {
             mutableState.value = try {
                 LoadState.Content(fetch())
             } catch (_: IOException) {

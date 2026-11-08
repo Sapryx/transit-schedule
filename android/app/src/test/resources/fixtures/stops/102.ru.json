@@ -1,0 +1,56 @@
+{
+  "id": 102,
+  "name": "Вокзал",
+  "routes": [
+    {
+      "id": 1,
+      "number": "2",
+      "mode": "trolleybus",
+      "directionIds": [
+        10
+      ]
+    },
+    {
+      "id": 3,
+      "number": "10",
+      "mode": "bus",
+      "directionIds": [
+        30
+      ]
+    },
+    {
+      "id": 4,
+      "number": "10A",
+      "mode": "bus",
+      "directionIds": [
+        40
+      ]
+    },
+    {
+      "id": 2,
+      "number": "15",
+      "mode": "trolleybus",
+      "directionIds": [
+        20,
+        21
+      ]
+    }
+  ],
+  "platforms": [
+    {
+      "id": 1020,
+      "lat": 52.4313,
+      "lon": 30.9937
+    },
+    {
+      "id": 1021,
+      "lat": 52.4314,
+      "lon": 30.9938
+    },
+    {
+      "id": 1022,
+      "lat": 52.4315,
+      "lon": 30.9939
+    }
+  ]
+}

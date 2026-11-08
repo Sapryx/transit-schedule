@@ -26,8 +26,9 @@ import com.sapryx.transit.navigation.Tab
 import com.sapryx.transit.routes.RouteScreen
 import com.sapryx.transit.routes.RouteViewModel
 import com.sapryx.transit.routes.RoutesScreen
-
-private const val STOP_ID = "stopId"
+import com.sapryx.transit.stops.StopScreen
+import com.sapryx.transit.stops.StopViewModel
+import com.sapryx.transit.stops.StopsScreen
 
 @Composable
 private fun Placeholder(text: String, tag: String) {
@@ -69,10 +70,13 @@ fun TransitApp() {
                 composable("route/{${RouteViewModel.ROUTE_ID}}", listOf(navArgument(RouteViewModel.ROUTE_ID) { type = NavType.IntType })) {
                     RouteScreen(onStopClick = { navController.navigate("stop/$it") })
                 }
-                composable("stop/{$STOP_ID}", listOf(navArgument(STOP_ID) { type = NavType.IntType })) { entry ->
-                    Placeholder(stringResource(Tab.Stops.title), "stop:${entry.arguments?.getInt(STOP_ID)}")
+                composable(Tab.Stops.name) {
+                    StopsScreen(onStopClick = { navController.navigate("stop/$it") })
                 }
-                (Tab.entries - Tab.Routes).forEach { tab ->
+                composable("stop/{${StopViewModel.STOP_ID}}", listOf(navArgument(StopViewModel.STOP_ID) { type = NavType.IntType })) {
+                    StopScreen(onRouteClick = { navController.navigate("route/$it") })
+                }
+                (Tab.entries - Tab.Routes - Tab.Stops).forEach { tab ->
                     composable(tab.name) { Placeholder(stringResource(tab.title), "placeholder") }
                 }
             }

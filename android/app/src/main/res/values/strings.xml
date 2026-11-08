@@ -12,6 +12,8 @@
     <string name="route_title_trolleybus">Trolleybus %1$s</string>
     <string name="routes_filter">Route number</string>
     <string name="routes_empty">No routes</string>
+    <string name="stops_search">Stop name</string>
+    <string name="stops_empty">No stops</string>
     <string name="load_error">Could not load data. Check your connection.</string>
     <string name="retry">Retry</string>
 </resources>
