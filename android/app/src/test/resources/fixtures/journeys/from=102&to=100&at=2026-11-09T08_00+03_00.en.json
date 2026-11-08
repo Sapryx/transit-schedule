@@ -1,0 +1,26 @@
+[
+  {
+    "departure": "2026-11-09T08:10:00+03:00",
+    "arrival": "2026-11-09T08:36:00+03:00",
+    "transfers": 0,
+    "legs": [
+      {
+        "routeId": 2,
+        "number": "15",
+        "mode": "trolleybus",
+        "directionId": 21,
+        "directionName": "Vokzal → Volotova",
+        "fromStop": {
+          "id": 102,
+          "name": "Vokzal"
+        },
+        "toStop": {
+          "id": 100,
+          "name": "Volotova"
+        },
+        "departure": "2026-11-09T08:10:00+03:00",
+        "arrival": "2026-11-09T08:36:00+03:00"
+      }
+    ]
+  }
+]

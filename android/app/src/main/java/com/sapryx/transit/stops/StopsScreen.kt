@@ -21,7 +21,7 @@ import com.sapryx.transit.routes.routeTitle
 import com.sapryx.transit.ui.LoadableContent
 
 @Composable
-fun StopsScreen(onStopClick: (Int) -> Unit, viewModel: StopsViewModel = hiltViewModel()) {
+fun StopsScreen(onStopClick: (Stop) -> Unit, viewModel: StopsViewModel = hiltViewModel()) {
     Column(Modifier.fillMaxSize()) {
         OutlinedTextField(
             value = viewModel.query,
@@ -39,7 +39,7 @@ fun StopsScreen(onStopClick: (Int) -> Unit, viewModel: StopsViewModel = hiltView
                     ListItem(
                         headlineContent = { Text(stop.name) },
                         supportingContent = { Text(stop.routes.map { stringResource(it.mode.routeTitle(), it.number) }.joinToString()) },
-                        modifier = Modifier.clickable { onStopClick(stop.id) },
+                        modifier = Modifier.clickable { onStopClick(stop) },
                     )
                 }
             }

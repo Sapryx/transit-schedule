@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -22,6 +23,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.sapryx.transit.journeys.Endpoint
+import com.sapryx.transit.journeys.JourneyScreen
+import com.sapryx.transit.journeys.JourneyViewModel
 import com.sapryx.transit.navigation.Tab
 import com.sapryx.transit.routes.RouteScreen
 import com.sapryx.transit.routes.RouteViewModel
@@ -36,6 +41,8 @@ private fun Placeholder(text: String, tag: String) {
         Text(text, Modifier.testTag(tag))
     }
 }
+
+private const val ENDPOINT = "endpoint"
 
 @Composable
 fun TransitApp() {
@@ -71,12 +78,28 @@ fun TransitApp() {
                     RouteScreen(onStopClick = { navController.navigate("stop/$it") })
                 }
                 composable(Tab.Stops.name) {
-                    StopsScreen(onStopClick = { navController.navigate("stop/$it") })
+                    StopsScreen(onStopClick = { navController.navigate("stop/${it.id}") })
                 }
                 composable("stop/{${StopViewModel.STOP_ID}}", listOf(navArgument(StopViewModel.STOP_ID) { type = NavType.IntType })) {
                     StopScreen(onRouteClick = { navController.navigate("route/$it") })
                 }
-                (Tab.entries - Tab.Routes - Tab.Stops).forEach { tab ->
+                composable(Tab.Journey.name) {
+                    JourneyScreen(
+                        onPickStop = { navController.navigate("pick-stop/${it.name}") },
+                        onRouteClick = { navController.navigate("route/$it") },
+                        onStopClick = { navController.navigate("stop/$it") },
+                    )
+                }
+                composable("pick-stop/{$ENDPOINT}") { entry ->
+                    val journeyEntry = remember(entry) { navController.getBackStackEntry(Tab.Journey.name) }
+                    val journeyViewModel: JourneyViewModel = hiltViewModel(journeyEntry)
+                    val endpoint = Endpoint.valueOf(checkNotNull(entry.arguments?.getString(ENDPOINT)))
+                    StopsScreen(onStopClick = {
+                        journeyViewModel.choose(endpoint, it)
+                        navController.popBackStack()
+                    })
+                }
+                (Tab.entries - Tab.Routes - Tab.Stops - Tab.Journey).forEach { tab ->
                     composable(tab.name) { Placeholder(stringResource(tab.title), "placeholder") }
                 }
             }
