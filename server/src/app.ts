@@ -6,6 +6,8 @@ import { dayTypeRoutes, holidayRoutes } from "./calendarRoutes.ts";
 import type { NetworkAdmin } from "./networkAdmin.ts";
 import { networkAdminRoutes } from "./networkAdminRoutes.ts";
 import { SyncError, type NetworkSync } from "./osm/networkSync.ts";
+import type { PassengerNetwork } from "./passengerNetwork.ts";
+import { passengerRoutes } from "./passengerRoutes.ts";
 import type { Schedule } from "./schedule.ts";
 import { scheduleRoutes } from "./scheduleRoutes.ts";
 
@@ -16,6 +18,7 @@ export function createApp({
   networkSync,
   networkAdmin,
   schedule,
+  passengerNetwork,
 }: {
   pool: pg.Pool;
   auth: Auth;
@@ -23,6 +26,7 @@ export function createApp({
   networkSync: NetworkSync;
   networkAdmin: NetworkAdmin;
   schedule: Schedule;
+  passengerNetwork: PassengerNetwork;
 }): express.Express {
   const app = express();
   app.use(express.json());
@@ -57,5 +61,6 @@ export function createApp({
   app.use("/api/admin", networkAdminRoutes(networkAdmin));
   app.use("/api/admin", scheduleRoutes(schedule));
   app.use("/api", dayTypeRoutes(calendar));
+  app.use("/api", passengerRoutes(passengerNetwork));
   return app;
 }

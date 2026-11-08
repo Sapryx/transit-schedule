@@ -1,0 +1,15 @@
+[
+  { "id": 1, "number": "2", "mode": "trolleybus", "directions": [{ "id": 10, "name": "Вокзал → Вокзал через Советская улица" }] },
+  { "id": 3, "number": "10", "mode": "bus", "directions": [{ "id": 30, "name": "Вокзал → Любенский" }] },
+  { "id": 4, "number": "10A", "mode": "bus", "directions": [{ "id": 40, "name": "Вокзал → Любенский через Рынок" }] },
+  {
+    "id": 2,
+    "number": "15",
+    "mode": "trolleybus",
+    "directions": [
+      { "id": 20, "name": "Волотова → Вокзал" },
+      { "id": 21, "name": "Вокзал → Волотова" }
+    ]
+  },
+  { "id": 5, "number": "43", "mode": "bus", "directions": [{ "id": 50, "name": "Любенский → Волотова" }] }
+]

@@ -1,15 +1,11 @@
 import pg from "pg";
 import { transaction } from "./database.ts";
+import { directionName, directionPlatforms, isScheduled, stopName, type DirectionName, type Name } from "./networkSql.ts";
 import type { Point, TransportMode } from "./osm/networkMapper.ts";
-
-interface Name {
-  ru: string;
-  en: string;
-}
 
 export interface DirectionSummary {
   id: number;
-  name: { from: Name; to: Name; via: Name | null };
+  name: DirectionName;
   scheduled: boolean;
   needsReview: boolean;
   missingFromOsm: boolean;
@@ -59,30 +55,20 @@ export interface NetworkAdmin {
   remove(table: Deletable, id: number): Promise<Outcome>;
 }
 
-const stopName = (stop: string) => `json_build_object('ru', ${stop}.name_ru, 'en', ${stop}.name_en)`;
-
-const endStop = (order: "ASC" | "DESC") => `(
-  SELECT ${stopName("s")} FROM direction_platforms dp JOIN platforms p ON p.id = dp.platform_id JOIN stops s ON s.id = p.stop_id
-  WHERE dp.direction_id = d.id ORDER BY dp.position ${order} LIMIT 1)`;
-
 const departures = (dayType: string) =>
   `COALESCE((SELECT json_agg(minutes ORDER BY minutes) FROM departures WHERE direction_id = d.id AND day_type = '${dayType}'), '[]')`;
 
 const directionSummary = `
   'id', d.id,
-  'name', json_build_object('from', ${endStop("ASC")}, 'to', ${endStop("DESC")}, 'via', (SELECT ${stopName("v")} FROM stops v WHERE v.id = d.via_stop_id)),
-  'scheduled', EXISTS (SELECT FROM departures WHERE direction_id = d.id)
-    AND NOT EXISTS (SELECT FROM direction_platforms WHERE direction_id = d.id AND travel_offset IS NULL),
+  'name', ${directionName},
+  'scheduled', ${isScheduled},
   'needsReview', d.needs_review,
   'missingFromOsm', d.missing_from_osm`;
 
 const directionDetail = `${directionSummary},
-  'platforms', (
-    SELECT json_agg(json_build_object(
+  'platforms', ${directionPlatforms(`
       'platformId', p.id, 'stopId', s.id, 'stopName', ${stopName("s")}, 'lat', p.latitude, 'lon', p.longitude,
-      'travelOffset', dp.travel_offset, 'interpolated', dp.interpolated) ORDER BY dp.position)
-    FROM direction_platforms dp JOIN platforms p ON p.id = dp.platform_id JOIN stops s ON s.id = p.stop_id
-    WHERE dp.direction_id = d.id),
+      'travelOffset', dp.travel_offset, 'interpolated', dp.interpolated`)},
   'departures', json_build_object('weekday', ${departures("weekday")}, 'weekend', ${departures("weekend")}),
   'path', d.path`;
 

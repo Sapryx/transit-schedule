@@ -1,0 +1,27 @@
+{
+  "id": 2,
+  "number": "15",
+  "mode": "trolleybus",
+  "directions": [
+    {
+      "id": 20,
+      "name": "Волотова → Вокзал",
+      "stops": [
+        { "stopId": 100, "platformId": 1000, "name": "Волотова", "lat": 52.4601, "lon": 31.0456, "travelOffset": 0 },
+        { "stopId": 101, "platformId": 1010, "name": "улица Бровки", "lat": 52.4502, "lon": 31.0102, "travelOffset": 6 },
+        { "stopId": 102, "platformId": 1020, "name": "Вокзал", "lat": 52.4313, "lon": 30.9937, "travelOffset": 14 }
+      ],
+      "path": [[52.4601, 31.0456], [52.4502, 31.0102], [52.4313, 30.9937]]
+    },
+    {
+      "id": 21,
+      "name": "Вокзал → Волотова",
+      "stops": [
+        { "stopId": 102, "platformId": 1021, "name": "Вокзал", "lat": 52.4314, "lon": 30.9938, "travelOffset": 0 },
+        { "stopId": 101, "platformId": 1011, "name": "улица Бровки", "lat": 52.4503, "lon": 31.0103, "travelOffset": 8 },
+        { "stopId": 100, "platformId": 1001, "name": "Волотова", "lat": 52.4602, "lon": 31.0457, "travelOffset": 15 }
+      ],
+      "path": [[52.4314, 30.9938], [52.4503, 31.0103], [52.4602, 31.0457]]
+    }
+  ]
+}
