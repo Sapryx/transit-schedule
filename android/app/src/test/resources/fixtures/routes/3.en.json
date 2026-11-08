@@ -1,0 +1,39 @@
+{
+  "id": 3,
+  "number": "10",
+  "mode": "bus",
+  "directions": [
+    {
+      "id": 30,
+      "name": "Vokzal → Lyubensky",
+      "stops": [
+        {
+          "stopId": 102,
+          "platformId": 1022,
+          "name": "Vokzal",
+          "lat": 52.4315,
+          "lon": 30.9939,
+          "travelOffset": 0
+        },
+        {
+          "stopId": 103,
+          "platformId": 1030,
+          "name": "Lyubensky",
+          "lat": 52.4101,
+          "lon": 31.0211,
+          "travelOffset": 12
+        }
+      ],
+      "path": [
+        [
+          52.4315,
+          30.9939
+        ],
+        [
+          52.4101,
+          31.0211
+        ]
+      ]
+    }
+  ]
+}

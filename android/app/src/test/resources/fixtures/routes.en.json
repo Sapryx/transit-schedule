@@ -1,0 +1,15 @@
+[
+  { "id": 1, "number": "2", "mode": "trolleybus", "directions": [{ "id": 10, "name": "Vokzal → Vokzal via Sovetskaya ulitsa" }] },
+  { "id": 3, "number": "10", "mode": "bus", "directions": [{ "id": 30, "name": "Vokzal → Lyubensky" }] },
+  { "id": 4, "number": "10A", "mode": "bus", "directions": [{ "id": 40, "name": "Vokzal → Lyubensky via Rynok" }] },
+  {
+    "id": 2,
+    "number": "15",
+    "mode": "trolleybus",
+    "directions": [
+      { "id": 20, "name": "Volotova → Vokzal" },
+      { "id": 21, "name": "Vokzal → Volotova" }
+    ]
+  },
+  { "id": 5, "number": "43", "mode": "bus", "directions": [{ "id": 50, "name": "Lyubensky → Volotova" }] }
+]

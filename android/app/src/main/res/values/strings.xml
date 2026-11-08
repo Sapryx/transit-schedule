@@ -6,4 +6,12 @@
     <string name="tab_journey">Journey</string>
     <string name="tab_map">Map</string>
     <string name="tab_favourites">Favourites</string>
+    <string name="mode_bus">Buses</string>
+    <string name="mode_trolleybus">Trolleybuses</string>
+    <string name="route_title_bus">Bus %1$s</string>
+    <string name="route_title_trolleybus">Trolleybus %1$s</string>
+    <string name="routes_filter">Route number</string>
+    <string name="routes_empty">No routes</string>
+    <string name="load_error">Could not load data. Check your connection.</string>
+    <string name="retry">Retry</string>
 </resources>
