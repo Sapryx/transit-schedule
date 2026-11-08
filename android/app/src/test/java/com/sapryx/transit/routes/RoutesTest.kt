@@ -233,7 +233,8 @@ class RoutesTest {
 
         composeRule.onNodeWithText("ulitsa Brovki").performClick()
 
-        composeRule.onNodeWithTag("stop:101").assertIsDisplayed()
+        awaitText("Trolleybus 15")
+        composeRule.onNodeWithTag("stop-name").assertIsDisplayed()
     }
 
     @Test

@@ -12,6 +12,8 @@
     <string name="route_title_trolleybus">Троллейбус %1$s</string>
     <string name="routes_filter">Номер маршрута</string>
     <string name="routes_empty">Нет маршрутов</string>
+    <string name="stops_search">Название остановки</string>
+    <string name="stops_empty">Нет остановок</string>
     <string name="load_error">Не удалось загрузить данные. Проверьте подключение.</string>
     <string name="retry">Повторить</string>
 </resources>

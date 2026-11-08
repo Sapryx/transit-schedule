@@ -22,7 +22,8 @@ class FixtureServer {
                 if (failures.getAndUpdate { maxOf(it - 1, 0) } > 0) {
                     return MockResponse().setResponseCode(500)
                 }
-                val path = request.requestUrl!!.encodedPath.removePrefix("/api/")
+                val url = request.requestUrl!!
+                val path = url.encodedPath.removePrefix("/api/") + (url.query?.let { "/$it" } ?: "")
                 val fixture = javaClass.getResource("/fixtures/$path.${request.getHeader("Accept-Language")}.json")
                     ?: return MockResponse().setResponseCode(404)
                 return MockResponse().setBody(fixture.readText()).setBodyDelay(latencyMillis, TimeUnit.MILLISECONDS)

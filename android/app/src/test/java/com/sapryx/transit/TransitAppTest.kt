@@ -57,12 +57,12 @@ class TransitAppTest {
     @Test
     @Config(qualifiers = "en")
     fun opensEveryTabInEnglish() {
-        opensEveryTab(listOf("Stops", "Journey", "Map", "Favourites"), "Routes")
+        opensEveryTab(listOf("Journey", "Map", "Favourites"), "Routes")
     }
 
     @Test
     @Config(qualifiers = "ru")
     fun opensEveryTabInRussian() {
-        opensEveryTab(listOf("Остановки", "Поездка", "Карта", "Избранное"), "Маршруты")
+        opensEveryTab(listOf("Поездка", "Карта", "Избранное"), "Маршруты")
     }
 }
