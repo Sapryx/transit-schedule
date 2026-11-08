@@ -3,6 +3,7 @@ import type pg from "pg";
 import type { Auth } from "./auth.ts";
 import type { Calendar } from "./calendar.ts";
 import { dayTypeRoutes, holidayRoutes } from "./calendarRoutes.ts";
+import type { JourneyPlanner } from "./journeyPlanner.ts";
 import type { NetworkAdmin } from "./networkAdmin.ts";
 import { networkAdminRoutes } from "./networkAdminRoutes.ts";
 import { SyncError, type NetworkSync } from "./osm/networkSync.ts";
@@ -21,6 +22,7 @@ export function createApp({
   networkAdmin,
   schedule,
   passengerNetwork,
+  journeyPlanner,
   stopSchedule,
 }: {
   pool: pg.Pool;
@@ -30,6 +32,7 @@ export function createApp({
   networkAdmin: NetworkAdmin;
   schedule: Schedule;
   passengerNetwork: PassengerNetwork;
+  journeyPlanner: JourneyPlanner;
   stopSchedule: StopSchedule;
 }): express.Express {
   const app = express();
@@ -65,7 +68,7 @@ export function createApp({
   app.use("/api/admin", networkAdminRoutes(networkAdmin));
   app.use("/api/admin", scheduleRoutes(schedule));
   app.use("/api", dayTypeRoutes(calendar));
-  app.use("/api", passengerRoutes(passengerNetwork));
+  app.use("/api", passengerRoutes(passengerNetwork, journeyPlanner));
   app.use("/api", stopScheduleRoutes(stopSchedule));
   return app;
 }

@@ -19,4 +19,12 @@
     <string name="schedule_empty">No arrivals on these days</string>
     <string name="load_error">Could not load data. Check your connection.</string>
     <string name="retry">Retry</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="journey_from">From</string>
+    <string name="journey_to">To</string>
+    <string name="journey_swap">Swap stops</string>
+    <string name="journey_hint">Choose start and destination stops</string>
+    <string name="journey_empty">No journeys within two hours. Try another time.</string>
+    <string name="journey_summary">%1$d min, no transfers</string>
 </resources>

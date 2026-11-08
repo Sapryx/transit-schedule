@@ -19,4 +19,12 @@
     <string name="schedule_empty">В эти дни рейсов нет</string>
     <string name="load_error">Не удалось загрузить данные. Проверьте подключение.</string>
     <string name="retry">Повторить</string>
+    <string name="ok">ОК</string>
+    <string name="cancel">Отмена</string>
+    <string name="journey_from">Откуда</string>
+    <string name="journey_to">Куда</string>
+    <string name="journey_swap">Поменять местами</string>
+    <string name="journey_hint">Выберите остановки отправления и назначения</string>
+    <string name="journey_empty">Нет поездок в ближайшие два часа. Выберите другое время.</string>
+    <string name="journey_summary">%1$d мин, без пересадок</string>
 </resources>
