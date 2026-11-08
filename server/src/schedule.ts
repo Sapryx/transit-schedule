@@ -1,5 +1,5 @@
 import type pg from "pg";
-import type { DayType } from "./calendar.ts";
+import { dayTypes, type DayType } from "./calendar.ts";
 import { transaction } from "./database.ts";
 
 export type ScheduleResult<E extends string> = "ok" | "not_found" | E;
@@ -8,8 +8,6 @@ export interface Schedule {
   setTravelOffsets(directionId: number, offsets: unknown): Promise<ScheduleResult<"invalid_travel_offsets">>;
   setDepartures(directionId: number, departures: unknown): Promise<ScheduleResult<"invalid_departures">>;
 }
-
-const dayTypes: DayType[] = ["weekday", "weekend"];
 
 const isMinutes = (value: unknown): value is number => Number.isInteger(value) && (value as number) >= 0 && (value as number) < 2880;
 

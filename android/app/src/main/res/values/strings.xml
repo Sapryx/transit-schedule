@@ -14,6 +14,9 @@
     <string name="routes_empty">No routes</string>
     <string name="stops_search">Stop name</string>
     <string name="stops_empty">No stops</string>
+    <string name="day_type_weekday">Weekdays</string>
+    <string name="day_type_weekend">Weekends</string>
+    <string name="schedule_empty">No arrivals on these days</string>
     <string name="load_error">Could not load data. Check your connection.</string>
     <string name="retry">Retry</string>
 </resources>

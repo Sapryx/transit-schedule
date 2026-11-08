@@ -1,7 +1,9 @@
 import type pg from "pg";
 import type { Clock } from "./clock.ts";
 
-export type DayType = "weekday" | "weekend";
+export const dayTypes = ["weekday", "weekend"] as const;
+
+export type DayType = (typeof dayTypes)[number];
 
 export interface DayInfo {
   date: string;
