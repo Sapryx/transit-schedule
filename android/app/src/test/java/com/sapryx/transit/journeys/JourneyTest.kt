@@ -81,9 +81,11 @@ class JourneyTest {
         awaitTag(field)
     }
 
-    private fun summaries() = composeRule.onAllNodesWithTag("journey-times", useUnmergedTree = true).fetchSemanticsNodes().map { node ->
+    private fun texts(tag: String) = composeRule.onAllNodesWithTag(tag, useUnmergedTree = true).fetchSemanticsNodes().map { node ->
         node.config[androidx.compose.ui.semantics.SemanticsProperties.Text].joinToString()
     }
+
+    private fun summaries() = texts("journey-times")
 
     @Test
     @Config(qualifiers = "en-w411dp-h891dp")
@@ -98,7 +100,7 @@ class JourneyTest {
 
     @Test
     @Config(qualifiers = "en-w411dp-h891dp")
-    fun findsDirectJourneysBetweenPickedStops() {
+    fun findsJourneysBetweenPickedStops() {
         openJourney("Journey")
 
         pick("journey-from", "Volotova")
@@ -107,8 +109,25 @@ class JourneyTest {
         awaitTag("journey-times")
         composeRule.onNodeWithTag("journey-from").assertTextEquals("Volotova")
         composeRule.onNodeWithTag("journey-to").assertTextEquals("Vokzal")
-        assertEquals(listOf("08:05 → 08:31", "08:20 → 08:46"), summaries())
+        assertEquals(listOf("08:05 → 08:31", "08:12 → 08:40", "08:20 → 08:46"), summaries())
         composeRule.onAllNodesWithText("26 min, no transfers").onFirst().assertIsDisplayed()
+        composeRule.onNodeWithText("28 min, 1 transfer").assertIsDisplayed()
+    }
+
+    @Test
+    @Config(qualifiers = "en-w411dp-h891dp")
+    fun expandsAJourneyIntoLegsWithTheTransferBetweenThem() {
+        openJourney("Journey")
+        pick("journey-from", "Volotova")
+        pick("journey-to", "Vokzal")
+        awaitTag("journey-times")
+
+        composeRule.onAllNodesWithTag("journey-times", useUnmergedTree = true)[1].performClick()
+
+        assertEquals(listOf("Bus 20", "Trolleybus 15"), texts("leg-route"))
+        assertEquals(listOf("08:12 Volotova", "08:18 ulitsa Brovki"), texts("leg-from"))
+        assertEquals(listOf("08:15 ulitsa Brovki", "08:40 Vokzal"), texts("leg-to"))
+        assertEquals(listOf("Transfer at ulitsa Brovki, wait 3 min"), texts("leg-transfer"))
     }
 
     @Test
@@ -242,6 +261,21 @@ class JourneyTest {
 
         composeRule.onNodeWithTag("leg-route").assertTextEquals("Троллейбус 15")
         composeRule.onNodeWithTag("leg-from").assertTextEquals("08:05 Волотова")
+    }
+
+    @Test
+    @Config(qualifiers = "ru-w411dp-h891dp")
+    fun showsTransfersInRussian() {
+        openJourney("Поездка")
+        pick("journey-from", "Волотова")
+        pick("journey-to", "Вокзал")
+        awaitTag("journey-times")
+        composeRule.onNodeWithText("28 мин, 1 пересадка").assertIsDisplayed()
+
+        composeRule.onAllNodesWithTag("journey-times", useUnmergedTree = true)[1].performClick()
+
+        assertEquals(listOf("Автобус 20", "Троллейбус 15"), texts("leg-route"))
+        assertEquals(listOf("Пересадка на остановке «улица Бровки», ожидание 3 мин"), texts("leg-transfer"))
     }
 
     @Test

@@ -30,4 +30,11 @@
     <string name="journey_hint">Выберите остановки отправления и назначения</string>
     <string name="journey_empty">Нет поездок в ближайшие два часа. Выберите другое время.</string>
     <string name="journey_summary">%1$d мин, без пересадок</string>
+    <plurals name="journey_summary_transfers">
+        <item quantity="one">%1$d мин, %2$d пересадка</item>
+        <item quantity="few">%1$d мин, %2$d пересадки</item>
+        <item quantity="many">%1$d мин, %2$d пересадок</item>
+        <item quantity="other">%1$d мин, %2$d пересадки</item>
+    </plurals>
+    <string name="journey_transfer">Пересадка на остановке «%1$s», ожидание %2$d мин</string>
 </resources>

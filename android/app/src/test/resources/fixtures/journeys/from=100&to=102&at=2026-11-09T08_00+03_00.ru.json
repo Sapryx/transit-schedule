@@ -24,6 +24,47 @@
     ]
   },
   {
+    "departure": "2026-11-09T08:12:00+03:00",
+    "arrival": "2026-11-09T08:40:00+03:00",
+    "transfers": 1,
+    "legs": [
+      {
+        "routeId": 3,
+        "number": "20",
+        "mode": "bus",
+        "directionId": 30,
+        "directionName": "Старая Волотова → Медгородок",
+        "fromStop": {
+          "id": 100,
+          "name": "Волотова"
+        },
+        "toStop": {
+          "id": 101,
+          "name": "улица Бровки"
+        },
+        "departure": "2026-11-09T08:12:00+03:00",
+        "arrival": "2026-11-09T08:15:00+03:00"
+      },
+      {
+        "routeId": 2,
+        "number": "15",
+        "mode": "trolleybus",
+        "directionId": 20,
+        "directionName": "Волотова → Вокзал",
+        "fromStop": {
+          "id": 101,
+          "name": "улица Бровки"
+        },
+        "toStop": {
+          "id": 102,
+          "name": "Вокзал"
+        },
+        "departure": "2026-11-09T08:18:00+03:00",
+        "arrival": "2026-11-09T08:40:00+03:00"
+      }
+    ]
+  },
+  {
     "departure": "2026-11-09T08:20:00+03:00",
     "arrival": "2026-11-09T08:46:00+03:00",
     "transfers": 0,

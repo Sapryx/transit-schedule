@@ -30,4 +30,9 @@
     <string name="journey_hint">Choose start and destination stops</string>
     <string name="journey_empty">No journeys within two hours. Try another time.</string>
     <string name="journey_summary">%1$d min, no transfers</string>
+    <plurals name="journey_summary_transfers">
+        <item quantity="one">%1$d min, %2$d transfer</item>
+        <item quantity="other">%1$d min, %2$d transfers</item>
+    </plurals>
+    <string name="journey_transfer">Transfer at %1$s, wait %2$d min</string>
 </resources>

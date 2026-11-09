@@ -4,7 +4,7 @@ import type { Clock } from "./clock.ts";
 import { directionName, directionPlatforms, isScheduled, stopName, type DirectionName, type Name } from "./networkSql.ts";
 import type { TransportMode } from "./osm/networkMapper.ts";
 import { localDirectionName, type Language } from "./passengerNetwork.ts";
-import { dayTypesAround, minskTime, minute } from "./minskTime.ts";
+import { dayTypesAround, minskTime, minute, type DatedDayType } from "./minskTime.ts";
 
 export interface JourneyStop {
   id: number;
@@ -50,16 +50,34 @@ interface TimetableDirection {
   departures: Partial<Record<DayType, number[]>>;
 }
 
-interface Candidate {
+interface Pattern {
   direction: TimetableDirection;
+  trips: number[];
+}
+
+interface Ride {
+  direction: TimetableDirection;
+  trip: number;
   board: TimetableStop;
   alight: TimetableStop;
+}
+
+interface Label {
+  arrival: number;
+  ride?: Ride;
+}
+
+interface Plan {
   departure: number;
   arrival: number;
+  rides: Ride[];
 }
 
 const windowMinutes = 120;
 const maxJourneys = 5;
+const maxTrips = 3;
+const transferMinutes = 2;
+const maxJourneyMinutes = 180;
 
 const timetableQuery = `
   SELECT r.id AS "routeId", r.number, r.transport_mode AS mode, d.id AS "directionId", ${directionName} AS name,
@@ -69,20 +87,67 @@ const timetableQuery = `
   FROM routes r JOIN directions d ON d.route_id = r.id
   WHERE NOT r.withdrawn AND ${isScheduled}`;
 
-function rides({ stops }: TimetableDirection, from: number, to: number): [TimetableStop, TimetableStop][] {
-  return stops.flatMap((board, index) => {
-    const alight = board.stopId === from ? stops.slice(index + 1).find((stop) => stop.stopId === to) : undefined;
-    return alight ? [[board, alight] as [TimetableStop, TimetableStop]] : [];
+const pattern = (direction: TimetableDirection, days: DatedDayType[]): Pattern => ({
+  direction,
+  trips: days.flatMap(({ midnight, dayType }) => (direction.departures[dayType] ?? []).map((minutes) => midnight + minutes * minute)).sort((a, b) => a - b),
+});
+
+const at = (trip: number, stop: TimetableStop) => trip + stop.offset * minute;
+
+function scan({ direction, trips }: Pattern, reached: Map<number, Label>, best: Map<number, number>, next: Map<number, Label>, latest: number) {
+  let current: { trip: number; board: TimetableStop } | undefined;
+  for (const stop of direction.stops) {
+    if (current) {
+      const arrival = at(current.trip, stop);
+      if (arrival <= latest && arrival < (best.get(stop.stopId) ?? Infinity)) {
+        best.set(stop.stopId, arrival);
+        next.set(stop.stopId, { arrival, ride: { direction, trip: current.trip, board: current.board, alight: stop } });
+      }
+    }
+    const label = reached.get(stop.stopId);
+    if (label) {
+      const ready = label.arrival + (label.ride ? transferMinutes * minute : 0);
+      const trip = trips.find((candidate) => at(candidate, stop) >= ready);
+      if (trip !== undefined && (!current || trip < current.trip)) {
+        current = { trip, board: stop };
+      }
+    }
+  }
+}
+
+function search(patterns: Pattern[], from: number, to: number, start: number): Plan[] {
+  const best = new Map([[from, start]]);
+  const rounds = [new Map<number, Label>([[from, { arrival: start }]])];
+  for (let round = 1; round <= maxTrips && rounds[round - 1].size > 0; round++) {
+    const next = new Map<number, Label>();
+    patterns.forEach((pattern) => scan(pattern, rounds[round - 1], best, next, start + maxJourneyMinutes * minute));
+    rounds.push(next);
+  }
+  return rounds.flatMap((labels, round) => {
+    const reached = labels.get(to);
+    if (!reached) {
+      return [];
+    }
+    const rides: Ride[] = [];
+    for (let stop = to, back = round; back > 0; back--) {
+      const ride = rounds[back].get(stop)!.ride!;
+      rides.unshift(ride);
+      stop = ride.board.stopId;
+    }
+    return [{ departure: at(rides[0].trip, rides[0].board), arrival: reached.arrival, rides }];
   });
 }
 
-const dominates = (other: Candidate, candidate: Candidate) =>
-  other.departure >= candidate.departure &&
-  other.arrival <= candidate.arrival &&
-  (other.departure > candidate.departure || other.arrival < candidate.arrival);
+const dominates = (other: Plan, plan: Plan) =>
+  other.departure >= plan.departure &&
+  other.arrival <= plan.arrival &&
+  other.rides.length <= plan.rides.length &&
+  (other.departure > plan.departure || other.arrival < plan.arrival || other.rides.length < plan.rides.length);
 
-function toJourney({ direction, board, alight, departure, arrival }: Candidate, language: Language): Journey {
-  const leg: Leg = {
+const key = (plan: Plan) => plan.rides.map(({ direction, trip, board, alight }) => `${direction.directionId}:${trip}:${board.stopId}:${alight.stopId}`).join("/");
+
+function toLeg({ direction, trip, board, alight }: Ride, language: Language): Leg {
+  return {
     routeId: direction.routeId,
     number: direction.number,
     mode: direction.mode,
@@ -90,43 +155,48 @@ function toJourney({ direction, board, alight, departure, arrival }: Candidate, 
     directionName: localDirectionName(direction.name, language),
     fromStop: { id: board.stopId, name: board.name[language] },
     toStop: { id: alight.stopId, name: alight.name[language] },
-    departure: minskTime(departure),
-    arrival: minskTime(arrival),
+    departure: minskTime(at(trip, board)),
+    arrival: minskTime(at(trip, alight)),
   };
-  return { departure: leg.departure, arrival: leg.arrival, transfers: 0, legs: [leg] };
 }
+
+const toJourney = (plan: Plan, language: Language): Journey => ({
+  departure: minskTime(plan.departure),
+  arrival: minskTime(plan.arrival),
+  transfers: plan.rides.length - 1,
+  legs: plan.rides.map((ride) => toLeg(ride, language)),
+});
 
 export function createJourneyPlanner({ pool, calendar, clock }: { pool: pg.Pool; calendar: Calendar; clock: Clock }): JourneyPlanner {
   return {
-    async journeys(from, to, at = clock.now(), language) {
+    async journeys(from, to, requested = clock.now(), language) {
       const { rows } = await pool.query<TimetableDirection>(timetableQuery);
       const visible = new Set(rows.flatMap((direction) => direction.stops.map((stop) => stop.stopId)));
       if (!visible.has(from) || !visible.has(to)) {
         return null;
       }
-      const start = at.getTime();
+      const start = requested.getTime();
       const end = start + windowMinutes * minute;
       const days = await dayTypesAround(calendar, start);
-      const candidates = rows
-        .flatMap((direction) =>
-          rides(direction, from, to).flatMap(([board, alight]) =>
-            days.flatMap(({ midnight, dayType }) =>
-              (direction.departures[dayType] ?? []).map((minutes) => ({
-                direction,
-                board,
-                alight,
-                departure: midnight + (minutes + board.offset) * minute,
-                arrival: midnight + (minutes + alight.offset) * minute,
-              })),
-            ),
-          ),
-        )
-        .filter(({ departure }) => departure >= start && departure <= end);
-      return candidates
-        .filter((candidate) => !candidates.some((other) => dominates(other, candidate)))
-        .sort((a, b) => a.departure - b.departure || a.arrival - b.arrival)
+      const patterns = rows.map((direction) => pattern(direction, days));
+      const starts = new Set(
+        patterns.flatMap(({ direction, trips }) =>
+          direction.stops.filter((stop) => stop.stopId === from).flatMap((stop) => trips.map((trip) => at(trip, stop))),
+        ),
+      );
+      const plans = new Map(
+        [...starts]
+          .filter((time) => time >= start && time <= end)
+          .flatMap((time) => search(patterns, from, to, time))
+          .filter((plan) => plan.departure <= end)
+          .map((plan) => [key(plan), plan]),
+      );
+      const found = [...plans.values()];
+      return found
+        .filter((plan) => !found.some((other) => dominates(other, plan)))
+        .sort((a, b) => a.departure - b.departure || a.arrival - b.arrival || a.rides.length - b.rides.length)
         .slice(0, maxJourneys)
-        .map((candidate) => toJourney(candidate, language));
+        .map((plan) => toJourney(plan, language));
     },
   };
 }
