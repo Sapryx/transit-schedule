@@ -4,7 +4,7 @@ import type { Clock } from "./clock.ts";
 import { directionName, type DirectionName } from "./networkSql.ts";
 import type { TransportMode } from "./osm/networkMapper.ts";
 import { byNumber, localDirectionName, visible, type Language } from "./passengerNetwork.ts";
-import { minskTime, minute, serviceDays } from "./serviceDays.ts";
+import { dayTypesAround, minskTime, minute } from "./minskTime.ts";
 
 export interface StopScheduleEntry {
   routeId: number;
@@ -58,7 +58,7 @@ export function createStopSchedule({ pool, calendar, clock }: { pool: pg.Pool; c
     async upcoming(stopId, at = clock.now(), limit, language) {
       const start = at.getTime();
       const end = start + windowMinutes * minute;
-      const days = await serviceDays(calendar, start);
+      const days = await dayTypesAround(calendar, start);
       const schedules = new Map(
         await Promise.all([...new Set(days.map(({ dayType }) => dayType))].map(async (dayType) => [dayType, await schedule(stopId, dayType, language)] as const)),
       );

@@ -1,6 +1,6 @@
 import type { Calendar, DayType } from "./calendar.ts";
 
-export interface ServiceDay {
+export interface DatedDayType {
   midnight: number;
   dayType: DayType;
 }
@@ -15,7 +15,7 @@ const minskMidnight = (date: string) => Date.parse(`${date}T00:00:00.000Z`) - mi
 
 export const minskTime = (time: number) => `${new Date(time + minskOffset).toISOString().slice(0, 19)}+03:00`;
 
-export function serviceDays(calendar: Calendar, time: number): Promise<ServiceDay[]> {
+export function dayTypesAround(calendar: Calendar, time: number): Promise<DatedDayType[]> {
   return Promise.all(
     [-1, 0, 1].map(async (shift) => {
       const date = minskDate(time + shift * day);

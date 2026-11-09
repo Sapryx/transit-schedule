@@ -4,7 +4,7 @@ import type { Clock } from "./clock.ts";
 import { directionName, directionPlatforms, isScheduled, stopName, type DirectionName, type Name } from "./networkSql.ts";
 import type { TransportMode } from "./osm/networkMapper.ts";
 import { localDirectionName, type Language } from "./passengerNetwork.ts";
-import { minskTime, minute, serviceDays } from "./serviceDays.ts";
+import { dayTypesAround, minskTime, minute } from "./minskTime.ts";
 
 export interface JourneyStop {
   id: number;
@@ -106,7 +106,7 @@ export function createJourneyPlanner({ pool, calendar, clock }: { pool: pg.Pool;
       }
       const start = at.getTime();
       const end = start + windowMinutes * minute;
-      const days = await serviceDays(calendar, start);
+      const days = await dayTypesAround(calendar, start);
       const candidates = rows
         .flatMap((direction) =>
           rides(direction, from, to).flatMap(([board, alight]) =>

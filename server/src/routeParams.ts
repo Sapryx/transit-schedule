@@ -2,6 +2,8 @@ import { isDate } from "./calendar.ts";
 
 export const isId = (value: string) => /^[1-9]\d{0,8}$/.test(value);
 
+export const isIdParam = (value: unknown): value is string => typeof value === "string" && isId(value);
+
 const dateTime = /^(\d{4}-\d{2}-\d{2})T([01]\d|2[0-3]):[0-5]\d(:[0-5]\d(\.\d{1,3})?)?(Z|[+-]([01]\d|2[0-3]):[0-5]\d)$/;
 
 export function parseDateTime(value: unknown): Date | null {
