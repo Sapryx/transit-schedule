@@ -17,6 +17,9 @@
     <string name="day_type_weekday">Будни</string>
     <string name="day_type_weekend">Выходные</string>
     <string name="schedule_empty">В эти дни рейсов нет</string>
+    <string name="upcoming_title">Ближайшие прибытия</string>
+    <string name="upcoming_empty">В ближайшие три часа рейсов нет</string>
+    <string name="upcoming_minutes">через %1$d мин</string>
     <string name="load_error">Не удалось загрузить данные. Проверьте подключение.</string>
     <string name="retry">Повторить</string>
     <string name="ok">ОК</string>

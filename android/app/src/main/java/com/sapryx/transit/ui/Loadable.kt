@@ -29,8 +29,12 @@ class Loadable<T>(private val scope: CoroutineScope, private val fetch: suspend 
     }
 
     fun load() {
-        job?.cancel()
         mutableState.value = LoadState.Loading
+        refresh()
+    }
+
+    fun refresh() {
+        job?.cancel()
         job = scope.launch {
             mutableState.value = try {
                 LoadState.Content(fetch())

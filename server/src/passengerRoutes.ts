@@ -1,7 +1,7 @@
 import express from "express";
 import type { JourneyPlanner } from "./journeyPlanner.ts";
 import { languages, type Language, type PassengerNetwork } from "./passengerNetwork.ts";
-import { isId, parseDateTime } from "./routeParams.ts";
+import { isId, isIdParam, parseDateTime } from "./routeParams.ts";
 
 function language(req: express.Request, res: express.Response): Language {
   const chosen = (req.acceptsLanguages(...languages) || "en") as Language;
@@ -20,8 +20,6 @@ export function byId<T>(find: (id: number, language: Language) => Promise<T | nu
     res.json(found);
   };
 }
-
-const isStopId = (value: unknown): value is string => typeof value === "string" && isId(value);
 
 export function passengerRoutes(passengerNetwork: PassengerNetwork, journeyPlanner: JourneyPlanner): express.Router {
   const router = express.Router();
@@ -43,7 +41,7 @@ export function passengerRoutes(passengerNetwork: PassengerNetwork, journeyPlann
     const chosen = language(req, res);
     const { from, to, at } = req.query;
     const time = at === undefined ? undefined : parseDateTime(at);
-    if (!isStopId(from) || !isStopId(to) || from === to || time === null) {
+    if (!isIdParam(from) || !isIdParam(to) || from === to || time === null) {
       res.status(400).json({ error: "invalid_parameters" });
       return;
     }

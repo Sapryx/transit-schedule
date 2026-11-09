@@ -40,6 +40,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.sapryx.transit.R
 import com.sapryx.transit.routes.routeTitle
 import com.sapryx.transit.stops.Stop
+import com.sapryx.transit.time.clockTime
 import com.sapryx.transit.ui.LoadableContent
 import java.time.Instant
 import java.time.LocalDate
@@ -49,10 +50,6 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
-
-private val clockTime = DateTimeFormatter.ofPattern("HH:mm")
-
-private fun String.clockTime() = OffsetDateTime.parse(this).format(clockTime)
 
 @Composable
 fun JourneyScreen(

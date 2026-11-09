@@ -22,6 +22,17 @@ data class StopScheduleEntry(
     val arrivals: List<Int>,
 )
 
+@Serializable
+data class UpcomingArrival(
+    val routeId: Int,
+    val number: String,
+    val mode: TransportMode,
+    val directionId: Int,
+    val directionName: String,
+    val arrival: String,
+    val minutesUntil: Int,
+)
+
 interface StopsApi {
     @GET("api/stops")
     suspend fun stops(@Query("query") query: String): List<Stop>
@@ -31,4 +42,7 @@ interface StopsApi {
 
     @GET("api/stops/{id}/schedule")
     suspend fun schedule(@Path("id") id: Int, @Query("dayType") dayType: String): List<StopScheduleEntry>
+
+    @GET("api/stops/{id}/upcoming")
+    suspend fun upcoming(@Path("id") id: Int, @Query("at") at: String): List<UpcomingArrival>
 }
