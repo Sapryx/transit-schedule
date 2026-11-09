@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -146,7 +147,7 @@ private fun TimeField(time: LocalTime, onChange: (LocalTime) -> Unit) {
 @Composable
 private fun JourneyCard(journey: Journey, onRouteClick: (Int) -> Unit, onStopClick: (Int) -> Unit) {
     var expanded by rememberSaveable { mutableStateOf(false) }
-    val minutes = ChronoUnit.MINUTES.between(OffsetDateTime.parse(journey.departure), OffsetDateTime.parse(journey.arrival)).toInt()
+    val minutes = minutesBetween(journey.departure, journey.arrival)
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(12.dp)) {
             Text(
@@ -154,13 +155,37 @@ private fun JourneyCard(journey: Journey, onRouteClick: (Int) -> Unit, onStopCli
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.testTag("journey-times"),
             )
-            Text(stringResource(R.string.journey_summary, minutes))
+            Text(
+                if (journey.transfers == 0) {
+                    stringResource(R.string.journey_summary, minutes)
+                } else {
+                    pluralStringResource(R.plurals.journey_summary_transfers, journey.transfers, minutes, journey.transfers)
+                },
+            )
         }
         if (expanded) {
-            journey.legs.forEach { leg -> LegDetails(leg, onRouteClick, onStopClick) }
+            journey.legs.forEachIndexed { index, leg ->
+                if (index > 0) {
+                    TransferDetails(journey.legs[index - 1], leg)
+                }
+                LegDetails(leg, onRouteClick, onStopClick)
+            }
         }
     }
 }
+
+@Composable
+private fun TransferDetails(arriving: Leg, departing: Leg) {
+    val wait = minutesBetween(arriving.arrival, departing.departure)
+    Text(
+        stringResource(R.string.journey_transfer, arriving.toStop.name, wait),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.secondary,
+        modifier = Modifier.padding(horizontal = 12.dp).testTag("leg-transfer"),
+    )
+}
+
+private fun minutesBetween(from: String, to: String) = ChronoUnit.MINUTES.between(OffsetDateTime.parse(from), OffsetDateTime.parse(to)).toInt()
 
 @Composable
 private fun LegDetails(leg: Leg, onRouteClick: (Int) -> Unit, onStopClick: (Int) -> Unit) {
