@@ -17,6 +17,9 @@
     <string name="day_type_weekday">Weekdays</string>
     <string name="day_type_weekend">Weekends</string>
     <string name="schedule_empty">No arrivals on these days</string>
+    <string name="upcoming_title">Upcoming arrivals</string>
+    <string name="upcoming_empty">Nothing arrives in the next three hours</string>
+    <string name="upcoming_minutes">in %1$d min</string>
     <string name="load_error">Could not load data. Check your connection.</string>
     <string name="retry">Retry</string>
     <string name="ok">OK</string>

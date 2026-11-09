@@ -8,11 +8,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sapryx.transit.calendar.CalendarApi
 import com.sapryx.transit.calendar.DayType
+import com.sapryx.transit.time.Ticker
 import com.sapryx.transit.ui.Loadable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.OffsetDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,6 +37,7 @@ class StopViewModel @Inject constructor(
     api: StopsApi,
     calendarApi: CalendarApi,
     clock: Clock,
+    private val ticker: Ticker,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val stopId: Int = checkNotNull(savedStateHandle[STOP_ID])
@@ -45,11 +48,17 @@ class StopViewModel @Inject constructor(
 
     val stop = Loadable(viewModelScope) { api.stop(stopId) }
 
+    val upcoming = Loadable(viewModelScope) { api.upcoming(stopId, OffsetDateTime.now(clock).toString()) }
+
     val schedule = Loadable(viewModelScope) {
         val today = todayType ?: calendarApi.dayType(LocalDate.now(clock).toString()).dayType.also { todayType = it }
         val selected = dayType ?: today.also { dayType = it }
         val now = LocalTime.now(clock)
         DaySchedule(api.schedule(stopId, selected.query), (now.hour * 60 + now.minute).takeIf { selected == today })
+    }
+
+    suspend fun keepUpcomingFresh() {
+        ticker.ticks().collect { upcoming.refresh() }
     }
 
     fun select(dayType: DayType) {

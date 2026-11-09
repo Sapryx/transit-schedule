@@ -1,0 +1,20 @@
+[
+  {
+    "routeId": 3,
+    "number": "10",
+    "mode": "bus",
+    "directionId": 30,
+    "directionName": "Vokzal → Lyubensky",
+    "arrival": "2026-11-09T10:25:00+03:00",
+    "minutesUntil": 12
+  },
+  {
+    "routeId": 2,
+    "number": "15",
+    "mode": "trolleybus",
+    "directionId": 21,
+    "directionName": "Vokzal → Volotova",
+    "arrival": "2026-11-09T10:40:00+03:00",
+    "minutesUntil": 27
+  }
+]
