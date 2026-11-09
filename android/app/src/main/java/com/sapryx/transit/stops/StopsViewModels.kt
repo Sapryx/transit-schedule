@@ -11,6 +11,7 @@ import com.sapryx.transit.calendar.DayType
 import com.sapryx.transit.time.Ticker
 import com.sapryx.transit.ui.Loadable
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.onStart
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime
@@ -58,7 +59,7 @@ class StopViewModel @Inject constructor(
     }
 
     suspend fun keepUpcomingFresh() {
-        ticker.ticks().collect { upcoming.refresh() }
+        ticker.ticks().onStart { emit(Unit) }.collect { upcoming.refresh() }
     }
 
     fun select(dayType: DayType) {

@@ -109,17 +109,17 @@ class UpcomingArrivalsTest {
 
     @Test
     @Config(qualifiers = "en-w411dp-h891dp")
-    fun doesNotRefreshWhileHidden() {
+    fun refreshesWhenShownAgainButNotWhileHidden() {
         val scenario = openVokzal("Stops", "Vokzal")
-        val shown = listOf("Bus 10 · Vokzal → Lyubensky 10:25 · in 13 min", "Trolleybus 15 · Vokzal → Volotova 10:40 · in 28 min")
-        awaitUpcoming(shown)
+        awaitUpcoming(listOf("Bus 10 · Vokzal → Lyubensky 10:25 · in 13 min", "Trolleybus 15 · Vokzal → Volotova 10:40 · in 28 min"))
 
         scenario.moveToState(Lifecycle.State.CREATED)
         tickAt("2026-11-09T10:12:30")
+        mutableClock.instant = MutableClock("2026-11-09T23:30:00").instant
         scenario.moveToState(Lifecycle.State.RESUMED)
 
-        composeRule.waitForIdle()
-        assertEquals(shown, upcoming())
+        awaitText("Nothing arrives in the next three hours")
+        assertEquals(emptyList<String>(), fixtures.requests.filter { "10_12_30" in it })
     }
 
     @Test
