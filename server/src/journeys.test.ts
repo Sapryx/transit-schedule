@@ -167,7 +167,7 @@ describe("GET /api/journeys", () => {
     await schedule(detail, { weekday: minutes.map((time) => time - offsetAt(detail, name, step)) }, step);
   }
 
-  const clock = (minutes: number) => minsk("2026-11-09", minutes).slice(11, 16);
+  const clockTime = (minutes: number) => minsk("2026-11-09", minutes).slice(11, 16);
 
   const summaries = (body: { departure: string; arrival: string; transfers: number; legs: object[] }[]) =>
     body.map((journey) => ({
@@ -197,13 +197,13 @@ describe("GET /api/journeys", () => {
         departure: minsk("2026-11-09", 480),
         arrival: minsk("2026-11-09", withTransfer),
         transfers: 1,
-        legs: [`20 ${chechersk} 08:00 → ${volotova} ${clock(atVolotova)}`, `15 ${volotova} ${clock(atVolotova + 2)} → ${belgut} ${clock(withTransfer)}`],
+        legs: [`20 ${chechersk} 08:00 → ${volotova} ${clockTime(atVolotova)}`, `15 ${volotova} ${clockTime(atVolotova + 2)} → ${belgut} ${clockTime(withTransfer)}`],
       },
       {
         departure: minsk("2026-11-09", 480),
         arrival: minsk("2026-11-09", direct),
         transfers: 0,
-        legs: [`20 ${chechersk} 08:00 → ${belgut} ${clock(direct)}`],
+        legs: [`20 ${chechersk} 08:00 → ${belgut} ${clockTime(direct)}`],
       },
     ]);
   });
@@ -223,9 +223,7 @@ describe("GET /api/journeys", () => {
   it.each([
     [1, []],
     [2, [1]],
-    [60, [1]],
-    [61, []],
-  ])("changes platforms within a stop given %i minutes", async (gap, expected) => {
+  ])("transfers between platforms of a stop given %i minutes", async (gap, expected) => {
     const route20 = await direction("20", chechersk, volotova);
     const route15 = await direction("15", volotova, trinity);
     await scheduleAt(route20, chechersk, [480]);
@@ -259,9 +257,9 @@ describe("GET /api/journeys", () => {
         arrival: minsk("2026-11-09", atVokzal),
         transfers: 2,
         legs: [
-          `20 ${chechersk} 08:00 → ${volotova} ${clock(atVolotova)}`,
-          `15 ${volotova} ${clock(atVolotova + 2)} → ${trinity} ${clock(atTrinity)}`,
-          `43 ${trinity} ${clock(atTrinity + 2)} → ${vokzal} ${clock(atVokzal)}`,
+          `20 ${chechersk} 08:00 → ${volotova} ${clockTime(atVolotova)}`,
+          `15 ${volotova} ${clockTime(atVolotova + 2)} → ${trinity} ${clockTime(atTrinity)}`,
+          `43 ${trinity} ${clockTime(atTrinity + 2)} → ${vokzal} ${clockTime(atVokzal)}`,
         ],
       },
     ]);
@@ -277,6 +275,34 @@ describe("GET /api/journeys", () => {
     const response = await journeys(stopId(route20, chechersk), stopId(route15, trinity), "2026-11-09T06:00:00+03:00");
 
     expect(departures(response.body)).toEqual([minsk("2026-11-09", 480)]);
+  });
+
+  it.each([
+    [180, [1]],
+    [181, []],
+  ])("offers a journey taking %i minutes only within three hours", async (duration, expected) => {
+    const route20 = await direction("20", chechersk, volotova);
+    const route15 = await direction("15", volotova, trinity);
+    await scheduleAt(route20, chechersk, [480]);
+    await scheduleAt(route15, volotova, [480 + duration - offsetAt(route15, trinity)]);
+
+    const response = await journeys(stopId(route20, chechersk), stopId(route15, trinity), "2026-11-09T08:00:00+03:00");
+
+    expect(transfers(response.body)).toEqual(expected);
+  });
+
+  it("transfers from a trip of the previous date to one after midnight", async () => {
+    const route20 = await direction("20", chechersk, volotova);
+    const route15 = await direction("15", volotova, trinity);
+    await schedule(route20, { weekday: [1450 - offsetAt(route20, chechersk)] });
+    const atVolotova = 1450 + offsetAt(route20, volotova) - offsetAt(route20, chechersk) - 1440;
+    await schedule(route15, { weekend: [atVolotova + 2] });
+
+    const response = await journeys(stopId(route20, chechersk), stopId(route15, trinity), "2026-11-14T00:05:00+03:00");
+
+    expect(response.body.map(({ departure, arrival, transfers }: { departure: string; arrival: string; transfers: number }) => [departure, arrival, transfers])).toEqual([
+      [minsk("2026-11-13", 1450), minsk("2026-11-14", atVolotova + 2 + offsetAt(route15, trinity)), 1],
+    ]);
   });
 
   it.each([

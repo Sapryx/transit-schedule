@@ -77,7 +77,7 @@ const windowMinutes = 120;
 const maxJourneys = 5;
 const maxTrips = 3;
 const transferMinutes = 2;
-const maxWaitMinutes = 60;
+const maxJourneyMinutes = 180;
 
 const timetableQuery = `
   SELECT r.id AS "routeId", r.number, r.transport_mode AS mode, d.id AS "directionId", ${directionName} AS name,
@@ -94,12 +94,12 @@ const pattern = (direction: TimetableDirection, days: DatedDayType[]): Pattern =
 
 const at = (trip: number, stop: TimetableStop) => trip + stop.offset * minute;
 
-function scan({ direction, trips }: Pattern, reached: Map<number, Label>, best: Map<number, number>, next: Map<number, Label>) {
+function scan({ direction, trips }: Pattern, reached: Map<number, Label>, best: Map<number, number>, next: Map<number, Label>, latest: number) {
   let current: { trip: number; board: TimetableStop } | undefined;
   for (const stop of direction.stops) {
     if (current) {
       const arrival = at(current.trip, stop);
-      if (arrival < (best.get(stop.stopId) ?? Infinity)) {
+      if (arrival <= latest && arrival < (best.get(stop.stopId) ?? Infinity)) {
         best.set(stop.stopId, arrival);
         next.set(stop.stopId, { arrival, ride: { direction, trip: current.trip, board: current.board, alight: stop } });
       }
@@ -107,9 +107,8 @@ function scan({ direction, trips }: Pattern, reached: Map<number, Label>, best: 
     const label = reached.get(stop.stopId);
     if (label) {
       const ready = label.arrival + (label.ride ? transferMinutes * minute : 0);
-      const latest = label.ride ? label.arrival + maxWaitMinutes * minute : Infinity;
       const trip = trips.find((candidate) => at(candidate, stop) >= ready);
-      if (trip !== undefined && at(trip, stop) <= latest && (!current || trip < current.trip)) {
+      if (trip !== undefined && (!current || trip < current.trip)) {
         current = { trip, board: stop };
       }
     }
@@ -121,7 +120,7 @@ function search(patterns: Pattern[], from: number, to: number, start: number): P
   const rounds = [new Map<number, Label>([[from, { arrival: start }]])];
   for (let round = 1; round <= maxTrips && rounds[round - 1].size > 0; round++) {
     const next = new Map<number, Label>();
-    patterns.forEach((pattern) => scan(pattern, rounds[round - 1], best, next));
+    patterns.forEach((pattern) => scan(pattern, rounds[round - 1], best, next, start + maxJourneyMinutes * minute));
     rounds.push(next);
   }
   return rounds.flatMap((labels, round) => {
