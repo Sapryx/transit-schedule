@@ -83,7 +83,8 @@ _Avoid_: Segment, section, hop
 
 **Transfer**:
 Leaving one trip and boarding another at the same stop, possibly at a different platform; the next trip must
-arrive at least 2 minutes after the first one does. A journey has at most two transfers.
+arrive at least 2 minutes and at most an hour after the first one does. A journey has at most two
+transfers.
 _Avoid_: Change, connection
 
 ## Passenger

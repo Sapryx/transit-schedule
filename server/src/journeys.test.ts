@@ -159,6 +159,126 @@ describe("GET /api/journeys", () => {
     expect(response.body).toEqual([]);
   });
 
+  const chechersk = "Улица Чечерская";
+  const volotova = "Волотова";
+  const trinity = "Свято-Троицкий храм";
+
+  async function scheduleAt(detail: DirectionDetail, name: string, minutes: number[], step = 2) {
+    await schedule(detail, { weekday: minutes.map((time) => time - offsetAt(detail, name, step)) }, step);
+  }
+
+  const clock = (minutes: number) => minsk("2026-11-09", minutes).slice(11, 16);
+
+  const summaries = (body: { departure: string; arrival: string; transfers: number; legs: object[] }[]) =>
+    body.map((journey) => ({
+      departure: journey.departure,
+      arrival: journey.arrival,
+      transfers: journey.transfers,
+      legs: (journey.legs as { number: string; fromStop: { name: string }; toStop: { name: string }; departure: string; arrival: string }[]).map(
+        (leg) => `${leg.number} ${leg.fromStop.name} ${leg.departure.slice(11, 16)} → ${leg.toStop.name} ${leg.arrival.slice(11, 16)}`,
+      ),
+    }));
+
+  const transfers = (body: { transfers: number }[]) => body.map((journey) => journey.transfers);
+
+  it("offers a faster journey with a transfer alongside a slower direct one", async () => {
+    const route20 = await direction("20", chechersk, belgut);
+    const route15 = await direction("15", volotova, belgut);
+    await scheduleAt(route20, chechersk, [480], 10);
+    const atVolotova = 480 + offsetAt(route20, volotova, 10) - offsetAt(route20, chechersk, 10);
+    await scheduleAt(route15, volotova, [atVolotova + 2]);
+
+    const response = await journeys(stopId(route20, chechersk), stopId(route20, belgut), "2026-11-09T08:00:00+03:00", "ru");
+
+    const direct = 480 + offsetAt(route20, belgut, 10) - offsetAt(route20, chechersk, 10);
+    const withTransfer = atVolotova + 2 + offsetAt(route15, belgut);
+    expect(summaries(response.body)).toEqual([
+      {
+        departure: minsk("2026-11-09", 480),
+        arrival: minsk("2026-11-09", withTransfer),
+        transfers: 1,
+        legs: [`20 ${chechersk} 08:00 → ${volotova} ${clock(atVolotova)}`, `15 ${volotova} ${clock(atVolotova + 2)} → ${belgut} ${clock(withTransfer)}`],
+      },
+      {
+        departure: minsk("2026-11-09", 480),
+        arrival: minsk("2026-11-09", direct),
+        transfers: 0,
+        legs: [`20 ${chechersk} 08:00 → ${belgut} ${clock(direct)}`],
+      },
+    ]);
+  });
+
+  it("hides a journey with a transfer that arrives no earlier than a direct one", async () => {
+    const route20 = await direction("20", chechersk, belgut);
+    const route15 = await direction("15", volotova, belgut);
+    await scheduleAt(route20, chechersk, [480]);
+    const direct = 480 + offsetAt(route20, belgut) - offsetAt(route20, chechersk);
+    await scheduleAt(route15, volotova, [direct - offsetAt(route15, belgut)]);
+
+    const response = await journeys(stopId(route20, chechersk), stopId(route20, belgut), "2026-11-09T08:00:00+03:00");
+
+    expect(transfers(response.body)).toEqual([0]);
+  });
+
+  it.each([
+    [1, []],
+    [2, [1]],
+    [60, [1]],
+    [61, []],
+  ])("changes platforms within a stop given %i minutes", async (gap, expected) => {
+    const route20 = await direction("20", chechersk, volotova);
+    const route15 = await direction("15", volotova, trinity);
+    await scheduleAt(route20, chechersk, [480]);
+    const atVolotova = 480 + offsetAt(route20, volotova) - offsetAt(route20, chechersk);
+    await scheduleAt(route15, volotova, [atVolotova + gap]);
+
+    const response = await journeys(stopId(route20, chechersk), stopId(route15, trinity), "2026-11-09T08:00:00+03:00");
+
+    const platform = (detail: DirectionDetail) => detail.platforms.find((candidate) => candidate.stopName.ru === volotova)!;
+    expect(platform(route20).stopId).toBe(platform(route15).stopId);
+    expect(platform(route20).platformId).not.toBe(platform(route15).platformId);
+    expect(transfers(response.body)).toEqual(expected);
+  });
+
+  it("finds a journey with two transfers", async () => {
+    const route20 = await direction("20", chechersk, volotova);
+    const route15 = await direction("15", volotova, trinity);
+    const route43 = await direction("43", trinity, vokzal);
+    await scheduleAt(route20, chechersk, [480], 10);
+    const atVolotova = 480 + offsetAt(route20, volotova, 10) - offsetAt(route20, chechersk, 10);
+    await scheduleAt(route15, volotova, [atVolotova + 2]);
+    const atTrinity = atVolotova + 2 + offsetAt(route15, trinity);
+    await scheduleAt(route43, trinity, [atTrinity + 2]);
+    const atVokzal = atTrinity + 2 + offsetAt(route43, vokzal) - offsetAt(route43, trinity);
+
+    const response = await journeys(stopId(route20, chechersk), stopId(route43, vokzal), "2026-11-09T08:00:00+03:00", "ru");
+
+    expect(summaries(response.body)).toEqual([
+      {
+        departure: minsk("2026-11-09", 480),
+        arrival: minsk("2026-11-09", atVokzal),
+        transfers: 2,
+        legs: [
+          `20 ${chechersk} 08:00 → ${volotova} ${clock(atVolotova)}`,
+          `15 ${volotova} ${clock(atVolotova + 2)} → ${trinity} ${clock(atTrinity)}`,
+          `43 ${trinity} ${clock(atTrinity + 2)} → ${vokzal} ${clock(atVokzal)}`,
+        ],
+      },
+    ]);
+  });
+
+  it("offers a journey with a transfer that starts at the end of the two-hour window", async () => {
+    const route20 = await direction("20", chechersk, volotova);
+    const route15 = await direction("15", volotova, trinity);
+    await scheduleAt(route20, chechersk, [480, 481]);
+    const atVolotova = 480 + offsetAt(route20, volotova) - offsetAt(route20, chechersk);
+    await scheduleAt(route15, volotova, [atVolotova + 2, atVolotova + 4]);
+
+    const response = await journeys(stopId(route20, chechersk), stopId(route15, trinity), "2026-11-09T06:00:00+03:00");
+
+    expect(departures(response.body)).toEqual([minsk("2026-11-09", 480)]);
+  });
+
   it.each([
     ["a weekend", "2026-11-14"],
     ["a holiday", "2026-11-10"],
