@@ -4,6 +4,7 @@ import type { Clock } from "./clock.ts";
 import { directionName, directionPlatforms, isScheduled, stopName, type DirectionName, type Name } from "./networkSql.ts";
 import type { TransportMode } from "./osm/networkMapper.ts";
 import { localDirectionName, type Language } from "./passengerNetwork.ts";
+import { minskTime, minute, serviceDays } from "./serviceDays.ts";
 
 export interface JourneyStop {
   id: number;
@@ -57,9 +58,6 @@ interface Candidate {
   arrival: number;
 }
 
-const minute = 60_000;
-const day = 1440 * minute;
-const minskOffset = 180 * minute;
 const windowMinutes = 120;
 const maxJourneys = 5;
 
@@ -70,12 +68,6 @@ const timetableQuery = `
       SELECT day_type, json_agg(minutes ORDER BY minutes) AS minutes FROM departures WHERE direction_id = d.id GROUP BY day_type) t) AS departures
   FROM routes r JOIN directions d ON d.route_id = r.id
   WHERE NOT r.withdrawn AND ${isScheduled}`;
-
-const minskDate = (time: number) => new Date(time + minskOffset).toISOString().slice(0, 10);
-
-const minskMidnight = (date: string) => Date.parse(`${date}T00:00:00.000Z`) - minskOffset;
-
-const minskTime = (time: number) => `${new Date(time + minskOffset).toISOString().slice(0, 19)}+03:00`;
 
 function rides({ stops }: TimetableDirection, from: number, to: number): [TimetableStop, TimetableStop][] {
   return stops.flatMap((board, index) => {
@@ -114,16 +106,11 @@ export function createJourneyPlanner({ pool, calendar, clock }: { pool: pg.Pool;
       }
       const start = at.getTime();
       const end = start + windowMinutes * minute;
-      const serviceDays = await Promise.all(
-        [-1, 0, 1].map(async (shift) => {
-          const date = minskDate(start + shift * day);
-          return { midnight: minskMidnight(date), dayType: (await calendar.dayInfo(date)).dayType };
-        }),
-      );
+      const days = await serviceDays(calendar, start);
       const candidates = rows
         .flatMap((direction) =>
           rides(direction, from, to).flatMap(([board, alight]) =>
-            serviceDays.flatMap(({ midnight, dayType }) =>
+            days.flatMap(({ midnight, dayType }) =>
               (direction.departures[dayType] ?? []).map((minutes) => ({
                 direction,
                 board,
